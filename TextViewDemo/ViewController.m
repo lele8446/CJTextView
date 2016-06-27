@@ -13,11 +13,19 @@
 
 @implementation ViewController
 
+- (void)dealloc {
+    self.textView.myDelegate = nil;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     self.textView.placeHoldString = @"请输入...";
     self.textView.placeHoldTextFont = [UIFont systemFontOfSize:16];
+    self.textView.myDelegate = self;
+    self.textView.textView.textColor = [UIColor blueColor];
+    self.textView.textView.font = [UIFont systemFontOfSize:16];
+//    self.textView.textView.returnKeyType = UIReturnKeyDone;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -40,15 +48,20 @@
 }
 
 - (IBAction)click:(id)sender {
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"但双方"];
+    [self.textView becomeFirstResponder];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#但双方#"];
     [str addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:0.9737 green:0.2412 blue:0.1335 alpha:1.0] range:NSMakeRange(0,str.length)];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
     [str addAttribute:SPECIAL_TEXT value:@"SPECIAL_TEXT" range:NSMakeRange(0, str.length)];
-    
-    [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
+    self.textView.textView.selectedRange = [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.textView.selectedRange text:self.textView.textView.attributedText];
 }
 
 #pragma mark - CJUITextViewDelegate
+- (void)CJUITextViewEnterDone:(CJUITextView *)textView {
+    NSAttributedString *text = textView.textView.attributedText;
+    NSLog(@"text = %@",[text string]);
+}
+
 - (BOOL)textViewShouldBeginEditing:(CJUITextView *)textView {
 
     return YES;

@@ -17,18 +17,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vbW-74-CAu" customClass="CJUITextView">
-                                <rect key="frame" x="11" y="103" width="299" height="44"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lJg-Yz-2Mu" customClass="CJUITextView">
+                                <rect key="frame" x="12" y="71" width="300" height="39"/>
                                 <color key="backgroundColor" red="0.89914846449999997" green="0.91701564319999995" blue="0.94549632350000001" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="fFF-Id-deP"/>
+                                    <constraint firstAttribute="height" constant="39" id="YAP-wL-BXH"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="16"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                                <connections>
-                                    <outlet property="delegate" destination="BYZ-38-t0r" id="ck7-Oy-dcX"/>
-                                </connections>
-                            </textView>
+                            </view>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5Ad-f0-fAq">
                                 <rect key="frame" x="137" y="221" width="46" height="30"/>
                                 <state key="normal" title="Button"/>
@@ -39,14 +34,14 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="vbW-74-CAu" secondAttribute="trailing" constant="10" id="657-8b-hyd"/>
-                            <constraint firstItem="vbW-74-CAu" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="83" id="mRl-1x-7yG"/>
-                            <constraint firstItem="vbW-74-CAu" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="11" id="rJA-Ab-n54"/>
+                            <constraint firstItem="lJg-Yz-2Mu" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="51" id="dfu-7D-k5P"/>
+                            <constraint firstItem="lJg-Yz-2Mu" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="12" id="eDo-vF-88m"/>
+                            <constraint firstAttribute="trailing" secondItem="lJg-Yz-2Mu" secondAttribute="trailing" constant="8" id="y2G-RM-uH1"/>
                         </constraints>
                     </view>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
-                        <outlet property="textView" destination="vbW-74-CAu" id="2P8-oA-q5X"/>
+                        <outlet property="textView" destination="lJg-Yz-2Mu" id="rXU-Rm-X3S"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

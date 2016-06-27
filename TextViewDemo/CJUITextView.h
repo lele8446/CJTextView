@@ -15,6 +15,15 @@
 @protocol CJUITextViewDelegate <NSObject>
 
 @optional
+/**
+ *  CJUITextView输入了done的回调
+ *  一般在self.textView.returnKeyType = UIReturnKeyDone;时执行该回调
+ *
+ *  @param textView
+ *
+ *  @return
+ */
+- (void)CJUITextViewEnterDone:(CJUITextView *)textView;
 
 - (BOOL)textViewShouldBeginEditing:(CJUITextView *)textView;
 - (BOOL)textViewShouldEndEditing:(CJUITextView *)textView;
@@ -32,13 +41,16 @@
 
 @end
 
-@interface CJUITextView : UITextView
+@interface CJUITextView : UIView
 
 @property (nonatomic, weak) id<CJUITextViewDelegate> myDelegate;
+
+@property (nonatomic, strong) UITextView *textView;
 
 @property (nonatomic, copy, setter=setPlaceHoldString:)   NSString *placeHoldString;
 @property (nonatomic, strong, setter=setPlaceHoldTextFont:) UIFont *placeHoldTextFont;
 @property (nonatomic, strong, setter=setPlaceHoldTextColor:) UIColor *placeHoldTextColor;
+@property (nonatomic, strong, setter=setTextColor:) UIColor *textColor;
 
 /**
  *  在指定位置插入字符，并返回插入字符后的SelectedRange值
