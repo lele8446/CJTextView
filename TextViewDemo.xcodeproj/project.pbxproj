@@ -15,7 +15,7 @@
 		B42A51C91D1EC83400B29A5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B42A51C71D1EC83400B29A5C /* LaunchScreen.storyboard */; };
 		B42A51D41D1EC83400B29A5C /* TextViewDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51D31D1EC83400B29A5C /* TextViewDemoTests.m */; };
 		B42A51DF1D1EC83400B29A5C /* TextViewDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51DE1D1EC83400B29A5C /* TextViewDemoUITests.m */; };
-		B42A51EE1D1FDDFD00B29A5C /* CJUITextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51ED1D1FDDFD00B29A5C /* CJUITextView.m */; };
+		B4ED8FF91D20F003002F98F3 /* CJUITextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B4ED8FF81D20F003002F98F3 /* CJUITextView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,8 +52,8 @@
 		B42A51DA1D1EC83400B29A5C /* TextViewDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TextViewDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B42A51DE1D1EC83400B29A5C /* TextViewDemoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewDemoUITests.m; sourceTree = "<group>"; };
 		B42A51E01D1EC83400B29A5C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B42A51EC1D1FDDFD00B29A5C /* CJUITextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJUITextView.h; sourceTree = "<group>"; };
-		B42A51ED1D1FDDFD00B29A5C /* CJUITextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJUITextView.m; sourceTree = "<group>"; };
+		B4ED8FF71D20F003002F98F3 /* CJUITextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJUITextView.h; sourceTree = "<group>"; };
+		B4ED8FF81D20F003002F98F3 /* CJUITextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJUITextView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +104,7 @@
 		B42A51B81D1EC83400B29A5C /* TextViewDemo */ = {
 			isa = PBXGroup;
 			children = (
+				B4ED8FF61D20F003002F98F3 /* CJUITextView */,
 				B42A51BC1D1EC83400B29A5C /* AppDelegate.h */,
 				B42A51BD1D1EC83400B29A5C /* AppDelegate.m */,
 				B42A51BF1D1EC83400B29A5C /* ViewController.h */,
@@ -113,8 +114,6 @@
 				B42A51C71D1EC83400B29A5C /* LaunchScreen.storyboard */,
 				B42A51CA1D1EC83400B29A5C /* Info.plist */,
 				B42A51B91D1EC83400B29A5C /* Supporting Files */,
-				B42A51EC1D1FDDFD00B29A5C /* CJUITextView.h */,
-				B42A51ED1D1FDDFD00B29A5C /* CJUITextView.m */,
 			);
 			path = TextViewDemo;
 			sourceTree = "<group>";
@@ -143,6 +142,15 @@
 				B42A51E01D1EC83400B29A5C /* Info.plist */,
 			);
 			path = TextViewDemoUITests;
+			sourceTree = "<group>";
+		};
+		B4ED8FF61D20F003002F98F3 /* CJUITextView */ = {
+			isa = PBXGroup;
+			children = (
+				B4ED8FF71D20F003002F98F3 /* CJUITextView.h */,
+				B4ED8FF81D20F003002F98F3 /* CJUITextView.m */,
+			);
+			path = CJUITextView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -275,7 +283,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B42A51EE1D1FDDFD00B29A5C /* CJUITextView.m in Sources */,
+				B4ED8FF91D20F003002F98F3 /* CJUITextView.m in Sources */,
 				B42A51C11D1EC83400B29A5C /* ViewController.m in Sources */,
 				B42A51BE1D1EC83400B29A5C /* AppDelegate.m in Sources */,
 				B42A51BB1D1EC83400B29A5C /* main.m in Sources */,
@@ -504,6 +512,7 @@
 				B42A51E51D1EC83400B29A5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B42A51E61D1EC83400B29A5C /* Build configuration list for PBXNativeTarget "TextViewDemoTests" */ = {
 			isa = XCConfigurationList;
@@ -512,6 +521,7 @@
 				B42A51E81D1EC83400B29A5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B42A51E91D1EC83400B29A5C /* Build configuration list for PBXNativeTarget "TextViewDemoUITests" */ = {
 			isa = XCConfigurationList;
@@ -520,6 +530,7 @@
 				B42A51EB1D1EC83400B29A5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

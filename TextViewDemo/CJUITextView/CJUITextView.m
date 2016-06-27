@@ -8,11 +8,13 @@
 
 #import "CJUITextView.h"
 #define SPECIAL_TEXT_NUM @"specialTextNum"
+#define SPECIAL_TEXT_COLOR [UIColor colorWithRed:0.2745 green:0.4353 blue:0.6275 alpha:1.0]
 
 @interface CJUITextView()<UITextViewDelegate>
 @property (nonatomic, strong) UILabel *placeHoldLabel;
 @property (nonatomic, strong) NSMutableDictionary *defaultAttributes;
 @property (nonatomic, assign) NSUInteger specialTextNum;//记录特殊文本的索引值
+@property (nonatomic, strong) UIColor *specialTextColor;//记录特殊文本的颜色
 
 @end
 
@@ -20,6 +22,10 @@
 
 - (BOOL)becomeFirstResponder {
     return [self.textView becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponder {
+    return [self.textView resignFirstResponder];
 }
 
 - (UITextView *)textView {
@@ -136,8 +142,8 @@
     NSMutableAttributedString *resultAttStr = [[NSMutableAttributedString alloc]initWithString:resultString];
     [attString enumerateAttributesInRange:withRange options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
         NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:attrs];
-        if (attrs[SPECIAL_TEXT]) {
-            [dic setObject:[UIColor colorWithRed:0.9737 green:0.2412 blue:0.1335 alpha:1.0] forKey:NSForegroundColorAttributeName];
+        if (attrs[SPECIAL_TEXT_NUM] && [attrs[SPECIAL_TEXT_NUM] integerValue] != 0) {
+            [dic setObject:self.specialTextColor forKey:NSForegroundColorAttributeName];
         }else{
             if (!self.textColor || self.textColor == nil) {
                 self.textColor = [UIColor blackColor];
@@ -177,6 +183,13 @@
         font = self.textView.font;
         [specialTextAttStr addAttribute:NSFontAttributeName value:font range:specialRange];
     }
+    UIColor *color = dicAtt[NSForegroundColorAttributeName];
+    if (!color || nil == color) {
+        self.specialTextColor = SPECIAL_TEXT_COLOR;
+        color = self.specialTextColor;
+        [specialTextAttStr addAttribute:NSForegroundColorAttributeName value:color range:specialRange];
+    }
+    self.specialTextColor = color;
     [specialTextAttStr addAttribute:SPECIAL_TEXT_NUM value:@(self.specialTextNum) range:specialRange];
     self.specialTextNum ++;
     
@@ -291,15 +304,6 @@ static void *TextViewObservationContext = &TextViewObservationContext;
             }
 
         }];
-    }
-}
-
-- (BOOL)isTheSameColor2:(UIColor*)color1 anotherColor:(UIColor*)color2 {
-    if (CGColorEqualToColor(color1.CGColor, color2.CGColor)) {
-        return YES;
-    }
-    else {
-        return NO;
     }
 }
 
