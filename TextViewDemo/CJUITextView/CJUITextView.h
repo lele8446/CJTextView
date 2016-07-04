@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-#define SPECIAL_TEXT @"specialText"
+#define SPECIAL_TEXT_COLOR [UIColor colorWithRed:1.0 green:0.2156 blue:0.1868 alpha:1.0]
 
 @class CJUITextView;
 
@@ -64,5 +64,10 @@
 - (NSRange)insterSpecialTextAndGetSelectedRange:(NSAttributedString *)specialText
                                   selectedRange:(NSRange)selectedRange
                                            text:(NSAttributedString *)attributedText;
+
+/**
+ *  CJUITextView直接显示富文本需先设置一下初始值显示效果才有效
+ */
+- (void)installStatus;
 
 @end

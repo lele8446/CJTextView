@@ -6,9 +6,9 @@
 //  Copyright © 2016年 YiChe. All rights reserved.
 //
 
+#define SPECIAL_TEXT_NUM   @"specialTextNum"
+
 #import "CJUITextView.h"
-#define SPECIAL_TEXT_NUM @"specialTextNum"
-#define SPECIAL_TEXT_COLOR [UIColor colorWithRed:0.2745 green:0.4353 blue:0.6275 alpha:1.0]
 
 @interface CJUITextView()<UITextViewDelegate>
 @property (nonatomic, strong) UILabel *placeHoldLabel;
@@ -26,6 +26,16 @@
 
 - (BOOL)resignFirstResponder {
     return [self.textView resignFirstResponder];
+}
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    UIView *hitView = [super hitTest:point withEvent:event];
+    if (hitView == self) {
+        [self becomeFirstResponder];
+        return nil;
+    }else {
+        return hitView;
+    }
 }
 
 - (UITextView *)textView {
@@ -143,6 +153,7 @@
     [attString enumerateAttributesInRange:withRange options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
         NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:attrs];
         if (attrs[SPECIAL_TEXT_NUM] && [attrs[SPECIAL_TEXT_NUM] integerValue] != 0) {
+            self.specialTextNum = self.specialTextNum > [attrs[SPECIAL_TEXT_NUM] integerValue]?self.specialTextNum:[attrs[SPECIAL_TEXT_NUM] integerValue];
             [dic setObject:self.specialTextColor forKey:NSForegroundColorAttributeName];
         }else{
             if (!self.textColor || self.textColor == nil) {
@@ -159,27 +170,17 @@
                                   selectedRange:(NSRange)selectedRange
                                            text:(NSAttributedString *)attributedText
 {
-    //针对输入时直接插入特殊文本的处理
+    //针对输入时，文本内容为空，直接插入特殊文本的处理
     if (self.textView.text.length == 0) {
-        [self.textView becomeFirstResponder];
-        NSMutableAttributedString *emptyTextStr = [[NSMutableAttributedString alloc] initWithString:@"1"];
-        UIFont *font = self.textView.font;
-        [emptyTextStr addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, emptyTextStr.length)];
-        if (!self.textColor || self.textColor == nil) {
-            self.textColor = [UIColor blackColor];
-        }
-        [emptyTextStr addAttribute:NSForegroundColorAttributeName value:self.textColor range:NSMakeRange(0, emptyTextStr.length)];
-        self.textView.attributedText = emptyTextStr;
-        [emptyTextStr deleteCharactersInRange:NSMakeRange(0, emptyTextStr.length)];
-        self.textView.attributedText = emptyTextStr;
+        [self installStatus];
     }
-
     NSMutableAttributedString *specialTextAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:specialText];
     NSRange specialRange = NSMakeRange(0, specialText.length);
     NSDictionary *dicAtt = [specialText attributesAtIndex:0 effectiveRange:&specialRange];
     //设置默认字体属性
     UIFont *font = dicAtt[NSFontAttributeName];
-    if (!font || nil == font) {
+    UIFont *defaultFont = [UIFont fontWithName:@"HelveticaNeue" size:12.0];//默认字体
+    if ([font.fontName isEqualToString:defaultFont.fontName] && font.pointSize == defaultFont.pointSize) {
         font = self.textView.font;
         [specialTextAttStr addAttribute:NSFontAttributeName value:font range:specialRange];
     }
@@ -190,8 +191,6 @@
         [specialTextAttStr addAttribute:NSForegroundColorAttributeName value:color range:specialRange];
     }
     self.specialTextColor = color;
-    [specialTextAttStr addAttribute:SPECIAL_TEXT_NUM value:@(self.specialTextNum) range:specialRange];
-    self.specialTextNum ++;
     
     NSMutableAttributedString *headTextAttStr = [[NSMutableAttributedString alloc] init];
     NSMutableAttributedString *tailTextAttStr = [[NSMutableAttributedString alloc] init];
@@ -219,6 +218,10 @@
         }];
     }
     
+    //为插入文本增加SPECIAL_TEXT_NUM索引
+    self.specialTextNum ++;
+    [specialTextAttStr addAttribute:SPECIAL_TEXT_NUM value:@(self.specialTextNum) range:specialRange];
+    
     NSMutableAttributedString *newTextStr = [[NSMutableAttributedString alloc] init];
     
     if (selectedRange.location > 0 && selectedRange.location != newTextStr.length) {
@@ -240,6 +243,20 @@
     self.textView.typingAttributes = self.defaultAttributes;
     NSRange newSelsctRange = NSMakeRange(selectedRange.location+specialTextAttStr.length, 0);
     return newSelsctRange;
+}
+
+//CJUITextView直接显示富文本需先设置一下初始值显示效果才有效
+- (void)installStatus {
+    NSMutableAttributedString *emptyTextStr = [[NSMutableAttributedString alloc] initWithString:@"1"];
+    UIFont *font = self.textView.font;
+    [emptyTextStr addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, emptyTextStr.length)];
+    if (!self.textColor || self.textColor == nil) {
+        self.textColor = [UIColor blackColor];
+    }
+    [emptyTextStr addAttribute:NSForegroundColorAttributeName value:self.textColor range:NSMakeRange(0, emptyTextStr.length)];
+    self.textView.attributedText = emptyTextStr;
+    [emptyTextStr deleteCharactersInRange:NSMakeRange(0, emptyTextStr.length)];
+    self.textView.attributedText = emptyTextStr;
 }
 
 - (void)hiddenPlaceHoldLabel {
@@ -305,8 +322,17 @@ static void *TextViewObservationContext = &TextViewObservationContext;
 
         }];
     }
+    self.textView.typingAttributes = self.defaultAttributes;
 }
 
+/**
+ *  UITextRange转换为NSRange
+ *
+ *  @param textView
+ *  @param selectedTextRange
+ *
+ *  @return
+ */
 - (NSRange)selectedRange:(UITextView *)textView selectTextRange:(UITextRange *)selectedTextRange {
     UITextPosition* beginning = textView.beginningOfDocument;
     UITextRange* selectedRange = selectedTextRange;
@@ -343,7 +369,8 @@ static void *TextViewObservationContext = &TextViewObservationContext;
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
-    if ([text isEqualToString:@""]) {
+    self.textView.typingAttributes = self.defaultAttributes;
+    if ([text isEqualToString:@""]) {//删除
         __block BOOL deleteSpecial = NO;
         NSRange oldRange = textView.selectedRange;
         

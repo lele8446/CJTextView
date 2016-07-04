@@ -52,7 +52,6 @@
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#但双方#"];
     [str addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:0.9737 green:0.2412 blue:0.1335 alpha:1.0] range:NSMakeRange(0,str.length)];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
-    [str addAttribute:SPECIAL_TEXT value:@"SPECIAL_TEXT" range:NSMakeRange(0, str.length)];
     self.textView.textView.selectedRange = [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.textView.selectedRange text:self.textView.textView.attributedText];
 }
 
