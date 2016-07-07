@@ -4,7 +4,7 @@
 * 1、添加placeHold提示
 * 2、输入时可插入不可编辑的自定义文本（如＃主题＃，@人名）；
 * 3、UITextView高度可根据输入内容动态调整<br/><br/>
-![](https://o44fado6w.qnssl.com/test1.gif)
+![](https://o44fado6w.qnssl.com/testimg.gif)
 <br />
 
 ###属性介绍
