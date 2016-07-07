@@ -10,43 +10,89 @@
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
                     <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
-                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                        <viewControllerLayoutGuide type="top" id="QcW-j4-Ng5"/>
+                        <viewControllerLayoutGuide type="bottom" id="Qbw-S9-htf"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lJg-Yz-2Mu" customClass="CJUITextView">
-                                <rect key="frame" x="12" y="71" width="300" height="39"/>
-                                <color key="backgroundColor" red="0.89914846449999997" green="0.91701564319999995" blue="0.94549632350000001" alpha="1" colorSpace="calibratedRGB"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Vqj-tk-eRm" customClass="CJUITextView">
+                                <rect key="frame" x="20" y="28" width="197" height="40"/>
+                                <color key="backgroundColor" red="0.96024525949999995" green="0.96709193859999998" blue="0.98763197589999996" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="39" id="YAP-wL-BXH"/>
+                                    <constraint firstAttribute="height" constant="40" id="sR7-LK-uvc"/>
                                 </constraints>
-                            </view>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5Ad-f0-fAq">
-                                <rect key="frame" x="137" y="221" width="46" height="30"/>
-                                <state key="normal" title="Button"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="289" translatesAutoresizingMaskIntoConstraints="NO" id="Dza-Hf-JVd">
+                                <rect key="frame" x="20" y="237" width="289" height="147"/>
+                                <color key="backgroundColor" red="1" green="0.99327105312212627" blue="0.94455279745926246" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="147" id="5to-i2-Ypb"/>
+                                </constraints>
+                                <attributedString key="attributedText">
+                                    <fragment content="显示输入内容">
+                                        <attributes>
+                                            <font key="NSFont" size="14" name="PingFangSC-Regular"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                        </attributes>
+                                    </fragment>
+                                </attributedString>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5Ad-f0-fAq">
+                                <rect key="frame" x="225" y="28" width="90" height="26"/>
+                                <color key="backgroundColor" red="1" green="0.65352552117146145" blue="0.62728067477984717" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="90" id="2aO-f2-2Ik"/>
+                                    <constraint firstAttribute="height" constant="26" id="pAO-bA-P4o"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <state key="normal" title="＃插入文本＃"/>
                                 <connections>
-                                    <action selector="click:" destination="BYZ-38-t0r" eventType="touchUpInside" id="VWX-f5-wQd"/>
+                                    <action selector="insertTextclick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="w5R-9O-uPH"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OyT-Pb-dfb">
+                                <rect key="frame" x="225" y="58" width="90" height="30"/>
+                                <color key="backgroundColor" red="1" green="0.71242691793459945" blue="0.60719155980254258" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="xQ4-VL-7oV"/>
+                                    <constraint firstAttribute="width" constant="90" id="zQb-NQ-Qbx"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <state key="normal" title="@特殊文本"/>
+                                <connections>
+                                    <action selector="insertTextclick2:" destination="BYZ-38-t0r" eventType="touchUpInside" id="pPg-E2-0KK"/>
                                 </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="lJg-Yz-2Mu" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="51" id="dfu-7D-k5P"/>
-                            <constraint firstItem="lJg-Yz-2Mu" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="12" id="eDo-vF-88m"/>
-                            <constraint firstAttribute="trailing" secondItem="lJg-Yz-2Mu" secondAttribute="trailing" constant="8" id="y2G-RM-uH1"/>
+                            <constraint firstItem="5Ad-f0-fAq" firstAttribute="top" secondItem="QcW-j4-Ng5" secondAttribute="bottom" constant="8" id="DR8-3T-vIQ"/>
+                            <constraint firstItem="Vqj-tk-eRm" firstAttribute="top" secondItem="QcW-j4-Ng5" secondAttribute="bottom" constant="8" id="NSy-rY-V38"/>
+                            <constraint firstAttribute="trailing" secondItem="5Ad-f0-fAq" secondAttribute="trailing" constant="5" id="Rnj-Wh-Ezc"/>
+                            <constraint firstItem="Vqj-tk-eRm" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="T4D-HP-xUd"/>
+                            <constraint firstItem="Dza-Hf-JVd" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="UY7-tS-ODu"/>
+                            <constraint firstItem="Qbw-S9-htf" firstAttribute="top" secondItem="Dza-Hf-JVd" secondAttribute="bottom" constant="184" id="cI5-Rv-N1p"/>
+                            <constraint firstItem="OyT-Pb-dfb" firstAttribute="top" secondItem="5Ad-f0-fAq" secondAttribute="bottom" constant="4" id="tQB-1A-0uw"/>
+                            <constraint firstAttribute="trailing" secondItem="OyT-Pb-dfb" secondAttribute="trailing" constant="5" id="v1Y-ee-Yif"/>
+                            <constraint firstAttribute="trailing" secondItem="Dza-Hf-JVd" secondAttribute="trailing" constant="11" id="vHR-DI-wAf"/>
+                            <constraint firstItem="OyT-Pb-dfb" firstAttribute="leading" secondItem="Vqj-tk-eRm" secondAttribute="trailing" constant="8" id="wEO-Q3-yQG"/>
                         </constraints>
                     </view>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
-                        <outlet property="textView" destination="lJg-Yz-2Mu" id="rXU-Rm-X3S"/>
+                        <outlet property="label" destination="Dza-Hf-JVd" id="sxN-zS-8h8"/>
+                        <outlet property="textView" destination="Vqj-tk-eRm" id="fV1-S6-kmD"/>
+                        <outlet property="textViewHeight" destination="sR7-LK-uvc" id="yTk-Qv-Xtw"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-59" y="372"/>
+            <point key="canvasLocation" x="-60" y="371"/>
         </scene>
     </scenes>
 </document>

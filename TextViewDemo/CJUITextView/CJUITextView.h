@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-#define SPECIAL_TEXT_COLOR [UIColor colorWithRed:1.0 green:0.2156 blue:0.1868 alpha:1.0]
-
 @class CJUITextView;
 
 @protocol CJUITextViewDelegate <NSObject>
@@ -24,6 +22,14 @@
  *  @return
  */
 - (void)CJUITextViewEnterDone:(CJUITextView *)textView;
+
+/**
+ *  CJUITextView自动改变高度
+ *
+ *  @param textView
+ *  @param size     改变高度后的size
+ */
+- (void)CJUITextView:(CJUITextView *)textView heightChanged:(CGRect)frame;
 
 - (BOOL)textViewShouldBeginEditing:(CJUITextView *)textView;
 - (BOOL)textViewShouldEndEditing:(CJUITextView *)textView;
@@ -41,16 +47,26 @@
 
 @end
 
-@interface CJUITextView : UIView
+@interface CJUITextView : UITextView
 
 @property (nonatomic, weak) id<CJUITextViewDelegate> myDelegate;
-
-@property (nonatomic, strong) UITextView *textView;
-
 @property (nonatomic, copy, setter=setPlaceHoldString:)   NSString *placeHoldString;
 @property (nonatomic, strong, setter=setPlaceHoldTextFont:) UIFont *placeHoldTextFont;
 @property (nonatomic, strong, setter=setPlaceHoldTextColor:) UIColor *placeHoldTextColor;
-@property (nonatomic, strong, setter=setTextColor:) UIColor *textColor;
+/**
+ *  是否根据输入内容自动调整高度(default NO)
+ */
+@property (nonatomic, assign, setter=setAutoLayoutHeight:) BOOL autoLayoutHeight;
+/**
+ *  autoLayoutHeight为YES时的最大高度(default MAXFLOAT)
+ */
+@property (nonatomic, assign) CGFloat maxHeight;
+
+/**
+ *  插入文本的颜色(default self.textColor)
+ */
+@property (nonatomic, strong, getter=getSpecialTextColor) UIColor *specialTextColor;
+
 
 /**
  *  在指定位置插入字符，并返回插入字符后的SelectedRange值

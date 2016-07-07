@@ -11,6 +11,9 @@
 
 @interface ViewController : UIViewController<CJUITextViewDelegate>
 @property (nonatomic, weak) IBOutlet CJUITextView *textView;
+@property (nonatomic, weak) IBOutlet UILabel *label;
+
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *textViewHeight;
 
 
 @end

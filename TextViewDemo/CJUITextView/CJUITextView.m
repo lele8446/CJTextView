@@ -14,54 +14,22 @@
 @property (nonatomic, strong) UILabel *placeHoldLabel;
 @property (nonatomic, strong) NSMutableDictionary *defaultAttributes;
 @property (nonatomic, assign) NSUInteger specialTextNum;//记录特殊文本的索引值
-@property (nonatomic, strong) UIColor *specialTextColor;//记录特殊文本的颜色
+@property (nonatomic, assign) CGRect defaultFrame;//初始frame值
 
 @end
 
 @implementation CJUITextView
 
-- (BOOL)becomeFirstResponder {
-    return [self.textView becomeFirstResponder];
-}
-
-- (BOOL)resignFirstResponder {
-    return [self.textView resignFirstResponder];
-}
-
-- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    UIView *hitView = [super hitTest:point withEvent:event];
-    if (hitView == self) {
-        [self becomeFirstResponder];
-        return nil;
-    }else {
-        return hitView;
-    }
-}
-
-- (UITextView *)textView {
-    if (!_textView) {
-        _textView = [[UITextView alloc]initWithFrame:self.bounds];
-        _textView.backgroundColor = [UIColor clearColor];
-        _textView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleBottomMargin;
-        _textView.autocorrectionType = UITextAutocorrectionTypeNo;
-        [self addSubview:_textView];
-    }
-    return _textView;
-}
-
 - (UILabel *)placeHoldLabel {
     if (!_placeHoldLabel) {
-        CGFloat height = 30;
-        height = height>self.bounds.size.height?self.bounds.size.height:height;
-        _placeHoldLabel = [[UILabel alloc] initWithFrame:CGRectMake(4,1, self.bounds.size.width - 8, height)];
+        _placeHoldLabel = [[UILabel alloc] initWithFrame:CGRectZero];
         [_placeHoldLabel setBackgroundColor:[UIColor clearColor]];
         _placeHoldLabel.numberOfLines = 0;
-        _placeHoldLabel.minimumScaleFactor = 0.5;
+        _placeHoldLabel.minimumScaleFactor = 0.01;
         _placeHoldLabel.adjustsFontSizeToFitWidth = YES;
         _placeHoldLabel.textAlignment = NSTextAlignmentLeft;
-        _placeHoldLabel.font = [UIFont systemFontOfSize:15];
+        _placeHoldLabel.font = self.font;
         _placeHoldLabel.textColor = [UIColor colorWithRed:0.498 green:0.498 blue:0.498 alpha:1.0];
-        _placeHoldLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
         [self addSubview:_placeHoldLabel];
     }
     return _placeHoldLabel;
@@ -70,7 +38,7 @@
 - (NSMutableDictionary *)defaultAttributes {
     if (!_defaultAttributes) {
         _defaultAttributes = [NSMutableDictionary dictionary];
-        [_defaultAttributes setObject:self.textView.font forKey:NSFontAttributeName];
+        [_defaultAttributes setObject:self.font forKey:NSFontAttributeName];
         if (!self.textColor || self.textColor == nil) {
             self.textColor = [UIColor blackColor];
         }
@@ -94,16 +62,30 @@
     self.placeHoldLabel.textColor = placeHoldTextColor;
 }
 
-- (void)setTextColor:(UIColor *)textColor {
-    _textColor = textColor;
-    self.textView.textColor = textColor;
+- (void)setAutoLayoutHeight:(BOOL)autoLayoutHeight {
+    _autoLayoutHeight = autoLayoutHeight;
+    if (_autoLayoutHeight) {
+        //高度自动调整的时候，不自动联想
+        self.autocorrectionType = UITextAutocorrectionTypeNo;
+        if (self.maxHeight == 0) {
+            self.maxHeight = MAXFLOAT;
+        } 
+    }else{
+        self.autocorrectionType = UITextAutocorrectionTypeDefault;
+    }
+}
+
+- (UIColor *)getSpecialTextColor {
+    if (!_specialTextColor || nil == _specialTextColor) {
+        _specialTextColor = self.textColor;
+    }
+    return _specialTextColor;
 }
 
 - (void)dealloc {
-    self.textView.delegate = nil;
+    self.delegate = nil;
     self.myDelegate = nil;
-    [self.textView removeObserver:self forKeyPath:@"selectedTextRange"];
-    [[NSNotificationCenter defaultCenter]removeObserver:self];
+    [self removeObserver:self forKeyPath:@"selectedTextRange"];
 }
 
 - (instancetype)init {
@@ -129,10 +111,60 @@
 
 - (void)commonInitialize {
     self.specialTextNum = 1;
-    self.textView.delegate = self;
+    self.delegate = self;
+    self.layoutManager.allowsNonContiguousLayout = NO;
     [self addObserverForTextView];
-    [self addTextDidChangeNotification];
     [self hiddenPlaceHoldLabel];
+}
+
+- (void)drawRect:(CGRect)rect {
+    [super drawRect:rect];
+    self.defaultFrame = self.frame;
+    [self placeHoldLabelFrame];
+}
+
+- (void)hiddenPlaceHoldLabel {
+    if (self.text.length > 0 || self.attributedText.length > 0) {
+        self.placeHoldLabel.hidden = YES;
+    }else{
+        self.placeHoldLabel.hidden = NO;
+        [self placeHoldLabelFrame];
+    }
+}
+
+- (void)placeHoldLabelFrame {
+    CGFloat height = 24;
+    if (height > self.defaultFrame.size.height-10) {
+        height = self.defaultFrame.size.height-10;
+        //文字内边距为0
+//        self.textContainerInset = UIEdgeInsetsMake(0, 0, 0, 0);
+    }
+    self.placeHoldLabel.frame = CGRectMake(8,8, self.defaultFrame.size.width - 10, height);
+    [self layoutIfNeeded];
+    
+    if (self.frame.size.height <= self.defaultFrame.size.height) {
+        self.contentSize = CGSizeMake(self.defaultFrame.size.width, self.defaultFrame.size.height);
+        [self layoutIfNeeded];
+        self.textContainerInset = UIEdgeInsetsMake(8, 0, 8, 0);
+        [self layoutIfNeeded];
+    }
+}
+
+- (void)changeSize {
+    CGRect oriFrame = self.frame;
+    CGSize sizeToFit = [self sizeThatFits:CGSizeMake(oriFrame.size.width, MAXFLOAT)];
+    if (sizeToFit.height < self.defaultFrame.size.height) {
+        sizeToFit.height = self.defaultFrame.size.height;
+    }
+    if (oriFrame.size.height != sizeToFit.height && sizeToFit.height <= self.maxHeight) {
+        oriFrame.size.height = sizeToFit.height;
+        self.frame = oriFrame;
+        
+        if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:heightChanged:)]) {
+            [self.myDelegate CJUITextView:self heightChanged:oriFrame];
+        }
+    }
+    [self scrollRangeToVisible:NSMakeRange(self.text.length, 0)];
 }
 
 /**
@@ -171,7 +203,7 @@
                                            text:(NSAttributedString *)attributedText
 {
     //针对输入时，文本内容为空，直接插入特殊文本的处理
-    if (self.textView.text.length == 0) {
+    if (self.text.length == 0) {
         [self installStatus];
     }
     NSMutableAttributedString *specialTextAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:specialText];
@@ -181,12 +213,11 @@
     UIFont *font = dicAtt[NSFontAttributeName];
     UIFont *defaultFont = [UIFont fontWithName:@"HelveticaNeue" size:12.0];//默认字体
     if ([font.fontName isEqualToString:defaultFont.fontName] && font.pointSize == defaultFont.pointSize) {
-        font = self.textView.font;
+        font = self.font;
         [specialTextAttStr addAttribute:NSFontAttributeName value:font range:specialRange];
     }
     UIColor *color = dicAtt[NSForegroundColorAttributeName];
     if (!color || nil == color) {
-        self.specialTextColor = SPECIAL_TEXT_COLOR;
         color = self.specialTextColor;
         [specialTextAttStr addAttribute:NSForegroundColorAttributeName value:color range:specialRange];
     }
@@ -239,55 +270,33 @@
         [newTextStr appendAttributedString:headTextAttStr];
         [newTextStr appendAttributedString:specialTextAttStr];
     }
-    self.textView.attributedText = newTextStr;
-    self.textView.typingAttributes = self.defaultAttributes;
+    self.attributedText = newTextStr;
     NSRange newSelsctRange = NSMakeRange(selectedRange.location+specialTextAttStr.length, 0);
+    self.selectedRange = newSelsctRange;
     return newSelsctRange;
 }
 
 //CJUITextView直接显示富文本需先设置一下初始值显示效果才有效
 - (void)installStatus {
     NSMutableAttributedString *emptyTextStr = [[NSMutableAttributedString alloc] initWithString:@"1"];
-    UIFont *font = self.textView.font;
+    UIFont *font = self.font;
     [emptyTextStr addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, emptyTextStr.length)];
     if (!self.textColor || self.textColor == nil) {
         self.textColor = [UIColor blackColor];
     }
     [emptyTextStr addAttribute:NSForegroundColorAttributeName value:self.textColor range:NSMakeRange(0, emptyTextStr.length)];
-    self.textView.attributedText = emptyTextStr;
+    self.attributedText = emptyTextStr;
     [emptyTextStr deleteCharactersInRange:NSMakeRange(0, emptyTextStr.length)];
-    self.textView.attributedText = emptyTextStr;
+    self.attributedText = emptyTextStr;
 }
 
-- (void)hiddenPlaceHoldLabel {
-    if (self.textView.text.length > 0 || self.textView.attributedText.length > 0) {
-        self.placeHoldLabel.hidden = YES;
-    }else{
-        self.placeHoldLabel.hidden = NO;
-    }
-}
-
-#pragma mark - NSNotificationCenter
-- (void)addTextDidChangeNotification {
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:UITextViewTextDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(textChanged:)
-                                                 name:UITextViewTextDidChangeNotification
-                                               object:nil];
-}
-
-- (void)textChanged:(NSNotification *)notification {
-    self.textView.typingAttributes = self.defaultAttributes;
-    [self hiddenPlaceHoldLabel];
-}
-
-#pragma mark - ObserverContentOffset
-static void *TextViewObservationContext = &TextViewObservationContext;
+#pragma mark - Observer
+static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRange;
 - (void)addObserverForTextView {
-    [self.textView addObserver:self
-                    forKeyPath:@"selectedTextRange"
-                       options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
-                       context:TextViewObservationContext];
+    [self addObserver:self
+           forKeyPath:@"selectedTextRange"
+              options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
+              context:TextViewObserverSelectedTextRange];
 }
 
 - (void)observeValueForKeyPath:(NSString*) path
@@ -295,34 +304,34 @@ static void *TextViewObservationContext = &TextViewObservationContext;
                         change:(NSDictionary*)change
                        context:(void*)context
 {
-    UITextRange *newContentStr = [change objectForKey:@"new"];
-    UITextRange *oldContentStr = [change objectForKey:@"old"];
-    NSRange newRange = [self selectedRange:self.textView selectTextRange:newContentStr];
-    NSRange oldRange = [self selectedRange:self.textView selectTextRange:oldContentStr];
-
-    self.textView.typingAttributes = self.defaultAttributes;
-    
-    if (context == TextViewObservationContext && [path isEqual:@"selectedTextRange"] && (newRange.location != oldRange.location)){
-        //判断光标移动，光标不能处在特殊文本内
-        [self.textView.attributedText enumerateAttribute:SPECIAL_TEXT_NUM inRange:NSMakeRange(0, self.textView.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
-//            NSLog(@"range = %@",NSStringFromRange(range));
-            if (attrs != nil && attrs != 0) {
-                if (newRange.location > range.location && newRange.location < (range.location+range.length)) {
-                    //光标距离左边界的值
-                    NSUInteger leftValue = newRange.location - range.location;
-                    //光标距离右边界的值
-                    NSUInteger rightValue = range.location+range.length - newRange.location;
-                    if (leftValue >= rightValue) {
-                        self.textView.selectedRange = NSMakeRange(self.textView.selectedRange.location-leftValue, 0);
-                    }else{
-                        self.textView.selectedRange = NSMakeRange(self.textView.selectedRange.location+rightValue, 0);
+    if (context == TextViewObserverSelectedTextRange && [path isEqual:@"selectedTextRange"]){
+        
+        UITextRange *newContentStr = [change objectForKey:@"new"];
+        UITextRange *oldContentStr = [change objectForKey:@"old"];
+        NSRange newRange = [self selectedRange:self selectTextRange:newContentStr];
+        NSRange oldRange = [self selectedRange:self selectTextRange:oldContentStr];
+        if (newRange.location != oldRange.location) {
+            //判断光标移动，光标不能处在特殊文本内
+            [self.attributedText enumerateAttribute:SPECIAL_TEXT_NUM inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+//                NSLog(@"range = %@",NSStringFromRange(range));
+                if (attrs != nil && attrs != 0) {
+                    if (newRange.location > range.location && newRange.location < (range.location+range.length)) {
+                        //光标距离左边界的值
+                        NSUInteger leftValue = newRange.location - range.location;
+                        //光标距离右边界的值
+                        NSUInteger rightValue = range.location+range.length - newRange.location;
+                        if (leftValue >= rightValue) {
+                            self.selectedRange = NSMakeRange(self.selectedRange.location-leftValue, 0);
+                        }else{
+                            self.selectedRange = NSMakeRange(self.selectedRange.location+rightValue, 0);
+                        }
                     }
                 }
-            }
-
-        }];
+                
+            }];
+        }
     }
-    self.textView.typingAttributes = self.defaultAttributes;
+    self.typingAttributes = self.defaultAttributes;
 }
 
 /**
@@ -369,7 +378,6 @@ static void *TextViewObservationContext = &TextViewObservationContext;
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
-    self.textView.typingAttributes = self.defaultAttributes;
     if ([text isEqualToString:@""]) {//删除
         __block BOOL deleteSpecial = NO;
         NSRange oldRange = textView.selectedRange;
@@ -395,7 +403,8 @@ static void *TextViewObservationContext = &TextViewObservationContext;
         if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewEnterDone:)]) {
             [self.myDelegate CJUITextViewEnterDone:self];
         }
-        if (self.textView.returnKeyType == UIReturnKeyDone) {
+        if (self.returnKeyType == UIReturnKeyDone) {
+            [self resignFirstResponder];
             return NO;
         }
     }
@@ -412,8 +421,14 @@ static void *TextViewObservationContext = &TextViewObservationContext;
 }
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
+    if (self.autoLayoutHeight) {
+        [self changeSize];
+    }else{
+        [self scrollRangeToVisible:NSMakeRange(self.text.length, 0)];
+    }
     [self hiddenPlaceHoldLabel];
-    self.textView.typingAttributes = self.defaultAttributes;
+    self.typingAttributes = self.defaultAttributes;
+    
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textViewDidChangeSelection:)]) {
         [self.myDelegate textViewDidChangeSelection:self];
     }
