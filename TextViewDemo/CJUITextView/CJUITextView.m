@@ -378,6 +378,7 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    self.typingAttributes = self.defaultAttributes;
     if ([text isEqualToString:@""]) {//删除
         __block BOOL deleteSpecial = NO;
         NSRange oldRange = textView.selectedRange;

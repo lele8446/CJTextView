@@ -44,14 +44,14 @@
     [self.textView becomeFirstResponder];
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#插入文本#"];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
-    self.textView.selectedRange = [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
+    [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
 }
 
 - (IBAction)insertTextclick2:(id)sender {
     [self.textView becomeFirstResponder];
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"@特殊文本"];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
-    self.textView.selectedRange = [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
+    [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
