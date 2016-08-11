@@ -7,7 +7,7 @@
 ![](http://7xnrwl.com1.z0.glb.clouddn.com/textView.gif)
 <br />
 
-##调用方法
+##引用到项目中
 ### 文件引用
 下载demo后直接把CJUITextView文件夹添加到项目中
 <br />
@@ -18,7 +18,7 @@ platform :ios, '7.0'
 pod 'CJTextView', '~> 0.0.1'
 ```
 
-###属性介绍
+##属性介绍
 ```objective-c
 /**
  *  是否根据输入内容自动调整高度(default NO)
@@ -34,7 +34,7 @@ pod 'CJTextView', '~> 0.0.1'
 @property (nonatomic, strong, getter=getSpecialTextColor) UIColor *specialTextColor;
 ```
 
-###调用方法
+##调用方法
   ```objective-c
   /**
    *  在指定位置插入字符，并返回插入字符后的SelectedRange值
