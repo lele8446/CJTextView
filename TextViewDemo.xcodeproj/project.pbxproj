@@ -15,7 +15,7 @@
 		B42A51C91D1EC83400B29A5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B42A51C71D1EC83400B29A5C /* LaunchScreen.storyboard */; };
 		B42A51D41D1EC83400B29A5C /* TextViewDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51D31D1EC83400B29A5C /* TextViewDemoTests.m */; };
 		B42A51DF1D1EC83400B29A5C /* TextViewDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51DE1D1EC83400B29A5C /* TextViewDemoUITests.m */; };
-		B4ED8FF91D20F003002F98F3 /* CJUITextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B4ED8FF81D20F003002F98F3 /* CJUITextView.m */; };
+		B4D79B791D5B248400166DB9 /* CJUITextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D79B781D5B248400166DB9 /* CJUITextView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,8 +52,8 @@
 		B42A51DA1D1EC83400B29A5C /* TextViewDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TextViewDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B42A51DE1D1EC83400B29A5C /* TextViewDemoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewDemoUITests.m; sourceTree = "<group>"; };
 		B42A51E01D1EC83400B29A5C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B4ED8FF71D20F003002F98F3 /* CJUITextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJUITextView.h; sourceTree = "<group>"; };
-		B4ED8FF81D20F003002F98F3 /* CJUITextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJUITextView.m; sourceTree = "<group>"; };
+		B4D79B771D5B248400166DB9 /* CJUITextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJUITextView.h; sourceTree = "<group>"; };
+		B4D79B781D5B248400166DB9 /* CJUITextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJUITextView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,7 +104,7 @@
 		B42A51B81D1EC83400B29A5C /* TextViewDemo */ = {
 			isa = PBXGroup;
 			children = (
-				B4ED8FF61D20F003002F98F3 /* CJUITextView */,
+				B4D79B761D5B248400166DB9 /* CJUITextView */,
 				B42A51BC1D1EC83400B29A5C /* AppDelegate.h */,
 				B42A51BD1D1EC83400B29A5C /* AppDelegate.m */,
 				B42A51BF1D1EC83400B29A5C /* ViewController.h */,
@@ -144,14 +144,14 @@
 			path = TextViewDemoUITests;
 			sourceTree = "<group>";
 		};
-		B4ED8FF61D20F003002F98F3 /* CJUITextView */ = {
+		B4D79B761D5B248400166DB9 /* CJUITextView */ = {
 			isa = PBXGroup;
 			children = (
-				B4ED8FF71D20F003002F98F3 /* CJUITextView.h */,
-				B4ED8FF81D20F003002F98F3 /* CJUITextView.m */,
+				B4D79B771D5B248400166DB9 /* CJUITextView.h */,
+				B4D79B781D5B248400166DB9 /* CJUITextView.m */,
 			);
 			path = CJUITextView;
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -283,7 +283,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B4ED8FF91D20F003002F98F3 /* CJUITextView.m in Sources */,
+				B4D79B791D5B248400166DB9 /* CJUITextView.m in Sources */,
 				B42A51C11D1EC83400B29A5C /* ViewController.m in Sources */,
 				B42A51BE1D1EC83400B29A5C /* AppDelegate.m in Sources */,
 				B42A51BB1D1EC83400B29A5C /* main.m in Sources */,
