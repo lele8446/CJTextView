@@ -7,6 +7,10 @@
 ![](http://7xnrwl.com1.z0.glb.clouddn.com/textView.gif)
 <br />
 
+##调用方法
+### 文件引用
+下载demo后直接把CJUITextView文件夹添加到项目中
+<br />
 ### cocoapods安装
 * Podfile<br/>
 ```ruby
