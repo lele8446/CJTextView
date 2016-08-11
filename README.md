@@ -7,6 +7,13 @@
 ![](http://7xnrwl.com1.z0.glb.clouddn.com/textView.gif)
 <br />
 
+### cocoapods安装
+* Podfile<br/>
+```ruby
+platform :ios, '7.0'
+pod 'CJTextView', '~> 0.0.1'
+```
+
 ###属性介绍
 ```objective-c
 /**
