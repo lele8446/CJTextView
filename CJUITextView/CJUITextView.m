@@ -86,6 +86,7 @@
     self.delegate = nil;
     self.myDelegate = nil;
     [self removeObserver:self forKeyPath:@"selectedTextRange"];
+    [self removeObserver:self forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
 }
 
 - (instancetype)init {
