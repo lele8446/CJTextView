@@ -13,6 +13,7 @@
 @property (nonatomic, strong) NSMutableDictionary *defaultAttributes;
 @property (nonatomic, assign) NSUInteger specialTextNum;//记录特殊文本的索引值
 @property (nonatomic, assign) CGRect defaultFrame;//初始frame值
+@property (nonatomic, assign) int addObserverTime;//注册KVO的次数
 
 @end
 
@@ -308,13 +309,14 @@
 static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRange;
 - (void)addObserverForTextView {
     //确保KVO只注册一次
-    static dispatch_once_t predicate;
-    dispatch_once(&predicate, ^{
-        [self addObserver:self
-               forKeyPath:@"selectedTextRange"
-                  options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
-                  context:TextViewObserverSelectedTextRange];
-    });
+    if (self.addObserverTime >= 1) {
+        return;
+    }
+    [self addObserver:self
+           forKeyPath:@"selectedTextRange"
+              options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
+              context:TextViewObserverSelectedTextRange];
+    self.addObserverTime ++;
 }
 
 - (void)observeValueForKeyPath:(NSString*) path
