@@ -53,6 +53,12 @@
 @property (nonatomic, copy, setter=setPlaceHoldString:)   NSString *placeHoldString;
 @property (nonatomic, strong, setter=setPlaceHoldTextFont:) UIFont *placeHoldTextFont;
 @property (nonatomic, strong, setter=setPlaceHoldTextColor:) UIColor *placeHoldTextColor;
+
+/**
+ *  placeHold提示内容Insets值(default (4, 4, 4, 4))
+ */
+@property (nonatomic, assign, setter=setPlaceHoldContainerInset:) UIEdgeInsets placeHoldContainerInset;
+
 /**
  *  是否根据输入内容自动调整高度(default NO)
  */
@@ -67,6 +73,10 @@
  */
 @property (nonatomic, strong, getter=getSpecialTextColor) UIColor *specialTextColor;
 
+/**
+ *  插入文本是否可编辑(default NO)
+ */
+@property (nonatomic, assign) BOOL enableEditInsterText;
 
 /**
  *  在指定位置插入字符，并返回插入字符后的SelectedRange值

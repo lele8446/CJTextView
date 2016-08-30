@@ -47,6 +47,11 @@
     return _defaultAttributes;
 }
 
+- (void)setPlaceHoldContainerInset:(UIEdgeInsets)placeHoldContainerInset {
+    _placeHoldContainerInset = placeHoldContainerInset;
+    [self placeHoldLabelFrame];
+}
+
 - (void)setPlaceHoldString:(NSString *)placeHoldString {
     _placeHoldString = placeHoldString;
     self.placeHoldLabel.text = placeHoldString;
@@ -73,6 +78,11 @@
     }else{
         self.autocorrectionType = UITextAutocorrectionTypeDefault;
     }
+}
+
+- (void)setFont:(UIFont *)font {
+    [super setFont:font];
+    [self setPlaceHoldTextFont:font];
 }
 
 - (UIColor *)getSpecialTextColor {
@@ -112,6 +122,7 @@
 
 - (void)commonInitialize {
     self.specialTextNum = 1;
+    self.placeHoldContainerInset = UIEdgeInsetsMake(4, 4, 4, 4);
     self.delegate = self;
     self.layoutManager.allowsNonContiguousLayout = NO;
     [self addObserverForTextView];
@@ -135,12 +146,12 @@
 
 - (void)placeHoldLabelFrame {
     CGFloat height = 24;
-    if (height > self.defaultFrame.size.height-10) {
-        height = self.defaultFrame.size.height-10;
+    if (height > self.defaultFrame.size.height-self.placeHoldContainerInset.top-self.placeHoldContainerInset.bottom) {
+        height = self.defaultFrame.size.height-self.placeHoldContainerInset.top-self.placeHoldContainerInset.bottom;
         //文字内边距为0
 //        self.textContainerInset = UIEdgeInsetsMake(0, 0, 0, 0);
     }
-    self.placeHoldLabel.frame = CGRectMake(8,8, self.defaultFrame.size.width - 10, height);
+    self.placeHoldLabel.frame = CGRectMake(self.placeHoldContainerInset.left,self.placeHoldContainerInset.top, self.defaultFrame.size.width - self.placeHoldContainerInset.left-self.placeHoldContainerInset.right, height);
     [self layoutIfNeeded];
     
     if (self.frame.size.height <= self.defaultFrame.size.height) {
@@ -305,7 +316,7 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
                         change:(NSDictionary*)change
                        context:(void*)context
 {
-    if (context == TextViewObserverSelectedTextRange && [path isEqual:@"selectedTextRange"]){
+    if (context == TextViewObserverSelectedTextRange && [path isEqual:@"selectedTextRange"] && !self.enableEditInsterText){
         
         UITextRange *newContentStr = [change objectForKey:@"new"];
         UITextRange *oldContentStr = [change objectForKey:@"old"];
@@ -380,7 +391,7 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
     self.typingAttributes = self.defaultAttributes;
-    if ([text isEqualToString:@""]) {//删除
+    if ([text isEqualToString:@""] && !self.enableEditInsterText) {//删除
         __block BOOL deleteSpecial = NO;
         NSRange oldRange = textView.selectedRange;
         

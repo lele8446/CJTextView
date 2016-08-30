@@ -22,8 +22,10 @@
     
     self.textView.maxHeight = 120;
     self.textView.autoLayoutHeight = YES;
+//    self.textView.enableEditInsterText = YES;
     self.textView.placeHoldString = @"请输入...";
-    self.textView.placeHoldTextFont = [UIFont systemFontOfSize:14];
+//    self.textView.placeHoldTextFont = [UIFont systemFontOfSize:14];
+    self.textView.font = [UIFont systemFontOfSize:14];
     self.textView.myDelegate = self;
     self.textView.textColor = [UIColor blueColor];
     self.textView.returnKeyType = UIReturnKeyDone;
