@@ -15,6 +15,7 @@
 		B42A51C91D1EC83400B29A5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B42A51C71D1EC83400B29A5C /* LaunchScreen.storyboard */; };
 		B42A51D41D1EC83400B29A5C /* TextViewDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51D31D1EC83400B29A5C /* TextViewDemoTests.m */; };
 		B42A51DF1D1EC83400B29A5C /* TextViewDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51DE1D1EC83400B29A5C /* TextViewDemoUITests.m */; };
+		B4910A201D7582DF00137CE2 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B4910A1F1D7582DF00137CE2 /* RootViewController.m */; };
 		B4D79B791D5B248400166DB9 /* CJUITextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D79B781D5B248400166DB9 /* CJUITextView.m */; };
 /* End PBXBuildFile section */
 
@@ -52,6 +53,8 @@
 		B42A51DA1D1EC83400B29A5C /* TextViewDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TextViewDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B42A51DE1D1EC83400B29A5C /* TextViewDemoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewDemoUITests.m; sourceTree = "<group>"; };
 		B42A51E01D1EC83400B29A5C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B4910A1E1D7582DF00137CE2 /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
+		B4910A1F1D7582DF00137CE2 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
 		B4D79B771D5B248400166DB9 /* CJUITextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJUITextView.h; sourceTree = "<group>"; };
 		B4D79B781D5B248400166DB9 /* CJUITextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJUITextView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -109,6 +112,8 @@
 				B42A51BD1D1EC83400B29A5C /* AppDelegate.m */,
 				B42A51BF1D1EC83400B29A5C /* ViewController.h */,
 				B42A51C01D1EC83400B29A5C /* ViewController.m */,
+				B4910A1E1D7582DF00137CE2 /* RootViewController.h */,
+				B4910A1F1D7582DF00137CE2 /* RootViewController.m */,
 				B42A51C21D1EC83400B29A5C /* Main.storyboard */,
 				B42A51C51D1EC83400B29A5C /* Assets.xcassets */,
 				B42A51C71D1EC83400B29A5C /* LaunchScreen.storyboard */,
@@ -287,6 +292,7 @@
 				B42A51C11D1EC83400B29A5C /* ViewController.m in Sources */,
 				B42A51BE1D1EC83400B29A5C /* AppDelegate.m in Sources */,
 				B42A51BB1D1EC83400B29A5C /* main.m in Sources */,
+				B4910A201D7582DF00137CE2 /* RootViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

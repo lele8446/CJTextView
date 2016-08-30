@@ -6,8 +6,6 @@
 //  Copyright © 2016年 YiChe. All rights reserved.
 //
 
-#define SPECIAL_TEXT_NUM   @"specialTextNum"
-
 #import "CJUITextView.h"
 
 @interface CJUITextView()<UITextViewDelegate>
@@ -85,6 +83,11 @@
     [self setPlaceHoldTextFont:font];
 }
 
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    self.typingAttributes = self.defaultAttributes;
+    [super setAttributedText:attributedText];
+}
+
 - (UIColor *)getSpecialTextColor {
     if (!_specialTextColor || nil == _specialTextColor) {
         _specialTextColor = self.textColor;
@@ -95,7 +98,6 @@
 - (void)dealloc {
     self.delegate = nil;
     self.myDelegate = nil;
-    [self removeObserver:self forKeyPath:@"selectedTextRange"];
     [self removeObserver:self forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
 }
 
@@ -305,10 +307,14 @@
 #pragma mark - Observer
 static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRange;
 - (void)addObserverForTextView {
-    [self addObserver:self
-           forKeyPath:@"selectedTextRange"
-              options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
-              context:TextViewObserverSelectedTextRange];
+    //确保KVO只注册一次
+    static dispatch_once_t predicate;
+    dispatch_once(&predicate, ^{
+        [self addObserver:self
+               forKeyPath:@"selectedTextRange"
+                  options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
+                  context:TextViewObserverSelectedTextRange];
+    });
 }
 
 - (void)observeValueForKeyPath:(NSString*) path
@@ -342,6 +348,8 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
                 
             }];
         }
+    }else{
+        [super observeValueForKeyPath:path ofObject:object change:change context:context];
     }
     self.typingAttributes = self.defaultAttributes;
 }

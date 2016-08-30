@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+//记录插入文本的索引
+#define SPECIAL_TEXT_NUM   @"specialTextNum"
+
 @class CJUITextView;
 
 @protocol CJUITextViewDelegate <NSObject>
