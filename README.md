@@ -15,11 +15,15 @@
 * Podfile<br/>
 ```ruby
 platform :ios, '7.0'
-pod 'CJTextView', '~> 0.0.1'
+pod 'CJTextView', '~> 0.0.3'
 ```
 
 ##属性介绍
 ```objective-c
+/**
+ *  placeHold提示内容Insets值(default (4, 4, 4, 4))
+ */
+@property (nonatomic, assign, setter=setPlaceHoldContainerInset:) UIEdgeInsets placeHoldContainerInset;
 /**
  *  是否根据输入内容自动调整高度(default NO)
  */
@@ -32,6 +36,10 @@ pod 'CJTextView', '~> 0.0.1'
  *  插入文本的颜色(default self.textColor)
  */
 @property (nonatomic, strong, getter=getSpecialTextColor) UIColor *specialTextColor;
+/**
+ *  插入文本是否可编辑(default NO)
+ */
+@property (nonatomic, assign) BOOL enableEditInsterText;
 ```
 
 ##调用方法
