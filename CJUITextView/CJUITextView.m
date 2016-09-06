@@ -126,6 +126,7 @@
 - (void)commonInitialize {
     self.specialTextNum = 1;
     self.placeHoldContainerInset = UIEdgeInsetsMake(4, 4, 4, 4);
+    self.font = [UIFont systemFontOfSize:14];
     self.delegate = self;
     self.layoutManager.allowsNonContiguousLayout = NO;
     [self addObserverForTextView];
