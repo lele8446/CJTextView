@@ -1,4 +1,4 @@
-# TextView
+# CJTextView
 ## 简介
 自定义UITextView：
 * 1、添加placeHold提示
