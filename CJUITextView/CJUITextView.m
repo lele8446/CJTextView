@@ -99,7 +99,16 @@
 - (void)dealloc {
     self.delegate = nil;
     self.myDelegate = nil;
-    [self removeObserver:self forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
+    
+    id obser = self.observationInfo;
+    if (obser) {
+        @try {
+            [self removeObserver:self forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
+        } @catch (NSException *exception) {
+        } @finally {
+            
+        }
+    }
 }
 
 - (instancetype)init {
@@ -145,6 +154,9 @@
     }else{
         self.placeHoldLabel.hidden = NO;
         [self placeHoldLabelFrame];
+    }
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:placeHoldLabelHidden:)]) {
+        [self.myDelegate CJUITextView:self placeHoldLabelHidden:self.placeHoldLabel.hidden];
     }
 }
 
@@ -355,6 +367,9 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
         [super observeValueForKeyPath:path ofObject:object change:change context:context];
     }
     self.typingAttributes = self.defaultAttributes;
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:changeSelectedRange:)]) {
+        [self.myDelegate CJUITextView:self changeSelectedRange:self.selectedRange];
+    }
 }
 
 /**

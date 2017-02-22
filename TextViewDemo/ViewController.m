@@ -103,4 +103,11 @@
 - (void)textViewDidChangeSelection:(CJUITextView *)textView {
     
 }
+
+- (void)CJUITextView:(CJUITextView *)textView placeHoldLabelHidden:(BOOL)hidden {
+    NSLog(@"placeHoldLabelHidden = %@",@(hidden));
+}
+- (void)CJUITextView:(CJUITextView *)textView changeSelectedRange:(NSRange)selectedRange {
+    NSLog(@"selectedRange = %@",NSStringFromRange(selectedRange));
+}
 @end

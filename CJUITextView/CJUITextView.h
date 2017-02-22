@@ -48,6 +48,20 @@
 - (BOOL)textView:(CJUITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange NS_AVAILABLE_IOS(7_0);
 - (BOOL)textView:(CJUITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange NS_AVAILABLE_IOS(7_0);
 
+/**
+ *  placeHoldLabel是否显示
+ *
+ *  @param textView
+ *  @param hidden
+ */
+- (void)CJUITextView:(CJUITextView *)textView placeHoldLabelHidden:(BOOL)hidden;
+/**
+ *  光标移动
+ *
+ *  @param textView
+ *  @param selectedRange
+ */
+- (void)CJUITextView:(CJUITextView *)textView changeSelectedRange:(NSRange)selectedRange;
 @end
 
 @interface CJUITextView : UITextView
