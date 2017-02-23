@@ -105,9 +105,17 @@
 }
 
 - (void)CJUITextView:(CJUITextView *)textView placeHoldLabelHidden:(BOOL)hidden {
-    NSLog(@"placeHoldLabelHidden = %@",@(hidden));
+    
+    if (hidden) {
+        NSLog(@"placeHoldLabelHidden = YES");
+    }else{
+        NSLog(@"placeHoldLabelHidden = NO");
+    }
 }
 - (void)CJUITextView:(CJUITextView *)textView changeSelectedRange:(NSRange)selectedRange {
-    NSLog(@"selectedRange = %@",NSStringFromRange(selectedRange));
+//    NSLog(@"selectedRange = %@",NSStringFromRange(selectedRange));
+    if (selectedRange.location == 0 && ((textView.text.length > 0)||(textView.attributedText.length > 0))) {
+        textView.selectedRange = NSMakeRange(1, 0);
+    }
 }
 @end

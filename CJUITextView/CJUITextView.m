@@ -10,6 +10,7 @@
 
 @interface CJUITextView()<UITextViewDelegate>
 @property (nonatomic, strong) UILabel *placeHoldLabel;
+@property (nonatomic, assign) BOOL placeHoldLabelHidden;
 @property (nonatomic, strong) NSMutableDictionary *defaultAttributes;
 @property (nonatomic, assign) NSUInteger specialTextNum;//记录特殊文本的索引值
 @property (nonatomic, assign) CGRect defaultFrame;//初始frame值
@@ -155,8 +156,11 @@
         self.placeHoldLabel.hidden = NO;
         [self placeHoldLabelFrame];
     }
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:placeHoldLabelHidden:)]) {
-        [self.myDelegate CJUITextView:self placeHoldLabelHidden:self.placeHoldLabel.hidden];
+    if (self.placeHoldLabelHidden != self.placeHoldLabel.hidden) {
+        self.placeHoldLabelHidden = self.placeHoldLabel.hidden;
+        if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:placeHoldLabelHidden:)]) {
+            [self.myDelegate CJUITextView:self placeHoldLabelHidden:self.placeHoldLabel.hidden];
+        }
     }
 }
 
