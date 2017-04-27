@@ -98,7 +98,7 @@
 /**
  *  在指定位置插入字符，并返回插入字符后的SelectedRange值
  *
- *  @param specialText    要插入的字符
+ *  @param specialText    要插入的富文本
  *  @param selectedRange  插入位置
  *  @param attributedText 插入前的文本
  *

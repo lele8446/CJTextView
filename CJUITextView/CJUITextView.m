@@ -238,6 +238,13 @@
     if (self.text.length == 0) {
         [self installStatus];
     }
+    
+    if (specialText.length <= 0) {
+        NSRange newSelsctRange = NSMakeRange(selectedRange.location, 0);
+        self.selectedRange = newSelsctRange;
+        return newSelsctRange;
+    }
+    
     NSMutableAttributedString *specialTextAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:specialText];
     NSRange specialRange = NSMakeRange(0, specialText.length);
     NSDictionary *dicAtt = [specialText attributesAtIndex:0 effectiveRange:&specialRange];

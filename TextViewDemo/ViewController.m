@@ -45,6 +45,7 @@
 - (IBAction)insertTextclick:(id)sender {
     [self.textView becomeFirstResponder];
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#插入文本#"];
+//    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@""];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
     [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
 }
