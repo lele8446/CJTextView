@@ -98,7 +98,7 @@
 /**
  *  在指定位置插入字符，并返回插入字符后的SelectedRange值
  *
- *  @param specialText    要插入的富文本
+ *  @param specialText    要插入的字符
  *  @param selectedRange  插入位置
  *  @param attributedText 插入前的文本
  *
@@ -112,5 +112,14 @@
  *  CJUITextView直接显示富文本需先设置一下初始值显示效果才有效
  */
 - (void)installStatus;
+
+/**
+ * dealloc方法时，主动移除CJUITextView内部的相关KVO监测
+ * 请在该 CJUITextView 所在的 父view 或者 ViewController 中的 dealloc 方法中调用
+ * 注意!!!  iOS8以下系统必须调用，不然会crash !!!
+ * 注意!!!  iOS8以下系统必须调用，不然会crash !!!
+ * 注意!!!  iOS8以下系统必须调用，不然会crash !!!
+ */
+- (void)removeObserver;
 
 @end

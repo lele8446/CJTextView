@@ -15,6 +15,7 @@
 
 - (void)dealloc {
     self.textView.myDelegate = nil;
+    [self.textView removeObserver];
 }
 
 - (void)viewDidLoad {

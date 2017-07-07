@@ -9,6 +9,9 @@
 #import "CJUITextView.h"
 
 @interface CJUITextView()<UITextViewDelegate>
+{
+    BOOL _hasRemoveObserver;
+}
 @property (nonatomic, strong) UILabel *placeHoldLabel;
 @property (nonatomic, assign) BOOL placeHoldLabelHidden;
 @property (nonatomic, strong) NSMutableDictionary *defaultAttributes;
@@ -74,7 +77,7 @@
         self.autocorrectionType = UITextAutocorrectionTypeNo;
         if (self.maxHeight == 0) {
             self.maxHeight = MAXFLOAT;
-        } 
+        }
     }else{
         self.autocorrectionType = UITextAutocorrectionTypeDefault;
     }
@@ -101,14 +104,13 @@
     self.delegate = nil;
     self.myDelegate = nil;
     
-    id obser = self.observationInfo;
-    if (obser) {
-        @try {
-            [self removeObserver:self forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
-        } @catch (NSException *exception) {
-        } @finally {
-            
-        }
+    float iOSVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
+    if (iOSVersion >= 9.0 && !_hasRemoveObserver) {
+        [self removeObserver];
+    }
+    
+    if (!_hasRemoveObserver) {
+        [self removeObserver];
     }
 }
 
@@ -128,9 +130,12 @@
     return self;
 }
 
-- (void)awakeFromNib {
-    [super awakeFromNib];
-    [self commonInitialize];
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        [self commonInitialize];
+    }
+    return self;
 }
 
 - (void)commonInitialize {
@@ -169,7 +174,7 @@
     if (height > self.defaultFrame.size.height-self.placeHoldContainerInset.top-self.placeHoldContainerInset.bottom) {
         height = self.defaultFrame.size.height-self.placeHoldContainerInset.top-self.placeHoldContainerInset.bottom;
         //文字内边距为0
-//        self.textContainerInset = UIEdgeInsetsMake(0, 0, 0, 0);
+        //        self.textContainerInset = UIEdgeInsetsMake(0, 0, 0, 0);
     }
     self.placeHoldLabel.frame = CGRectMake(self.placeHoldContainerInset.left,self.placeHoldContainerInset.top, self.defaultFrame.size.width - self.placeHoldContainerInset.left-self.placeHoldContainerInset.right, height);
     [self layoutIfNeeded];
@@ -238,13 +243,6 @@
     if (self.text.length == 0) {
         [self installStatus];
     }
-    
-    if (specialText.length <= 0) {
-        NSRange newSelsctRange = NSMakeRange(selectedRange.location, 0);
-        self.selectedRange = newSelsctRange;
-        return newSelsctRange;
-    }
-    
     NSMutableAttributedString *specialTextAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:specialText];
     NSRange specialRange = NSMakeRange(0, specialText.length);
     NSDictionary *dicAtt = [specialText attributesAtIndex:0 effectiveRange:&specialRange];
@@ -329,6 +327,19 @@
     self.attributedText = emptyTextStr;
 }
 
+- (void)removeObserver {
+    id obser = self.observationInfo;
+    if (obser) {
+        @try {
+            [self removeObserver:self forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
+        } @catch (NSException *exception) {
+        } @finally {
+            
+        }
+    }
+    _hasRemoveObserver = YES;
+}
+
 #pragma mark - Observer
 static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRange;
 - (void)addObserverForTextView {
@@ -357,7 +368,7 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
         if (newRange.location != oldRange.location) {
             //判断光标移动，光标不能处在特殊文本内
             [self.attributedText enumerateAttribute:SPECIAL_TEXT_NUM inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
-//                NSLog(@"range = %@",NSStringFromRange(range));
+                //                NSLog(@"range = %@",NSStringFromRange(range));
                 if (attrs != nil && attrs != 0) {
                     if (newRange.location > range.location && newRange.location < (range.location+range.length)) {
                         //光标距离左边界的值
