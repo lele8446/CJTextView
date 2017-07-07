@@ -116,9 +116,9 @@
 /**
  * dealloc方法时，主动移除CJUITextView内部的相关KVO监测
  * 请在该 CJUITextView 所在的 父view 或者 ViewController 中的 dealloc 方法中调用
- * 注意!!!  iOS8以下系统必须调用，不然会crash !!!
- * 注意!!!  iOS8以下系统必须调用，不然会crash !!!
- * 注意!!!  iOS8以下系统必须调用，不然会crash !!!
+ * 注意!!!  iOS9以下系统必须调用，不然会crash !!!
+ * 注意!!!  iOS9以下系统必须调用，不然会crash !!!
+ * 注意!!!  iOS9以下系统必须调用，不然会crash !!!
  */
 - (void)removeObserver;
 
