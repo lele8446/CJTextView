@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "CJTextView"
-  s.version      = "0.0.8"
+  s.version      = "0.0.9"
   s.summary      = "自定义UITextView"
   s.homepage     = "https://github.com/lele8446/TextViewDemo"
 
@@ -36,7 +36,7 @@ Pod::Spec.new do |s|
   }
   s.author       = { "lele8446" => "641003000@qq.com" }
   s.platform     = :ios, "7.0"
-  s.source       = { :git => "https://github.com/lele8446/TextViewDemo.git", :tag => "0.0.8" }
+  s.source       = { :git => "https://github.com/lele8446/TextViewDemo.git", :tag => "0.0.9" }
   s.source_files  = "CJUITextView/*"
 
   
