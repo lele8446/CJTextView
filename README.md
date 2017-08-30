@@ -63,3 +63,28 @@ pod 'CJTextView', '~> 0.0.3'
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
     [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
   ```
+
+## 更新日志
+#### 0.0.1
+发布版本，支持：1、添加placeHold提示；2、输入时可插入不可编辑的自定义文本（如＃主题＃，@人名）；3、UITextView高度可根据输入内容动态调整
+
+#### 0.0.2
+修复移除KVO监测的bug，添加placeHoldContainerInset设置
+
+#### 0.0.3、0.0.4
+修复KVO监测问题
+
+#### 0.0.5
+设置默认字体
+
+#### 0.0.6
+增加`CJUITextView:placeHoldLabelHidden:`以及`CJUITextView:changeSelectedRange:`回调
+
+#### 0.0.7
+插入特殊字符判空处理
+
+#### 0.0.8
+修复iOS9以下系统的KVO问题
+
+#### 0.0.9
+修复语音输入空白语音的错误
