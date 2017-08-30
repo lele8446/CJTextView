@@ -41,11 +41,17 @@
 - (NSMutableDictionary *)defaultAttributes {
     if (!_defaultAttributes) {
         _defaultAttributes = [NSMutableDictionary dictionary];
-        [_defaultAttributes setObject:self.font forKey:NSFontAttributeName];
+        if (self.font) {
+            [_defaultAttributes setObject:self.font forKey:NSFontAttributeName];
+        }
         if (!self.textColor || self.textColor == nil) {
             self.textColor = [UIColor blackColor];
+            [_defaultAttributes setObject:[UIColor blackColor] forKey:NSForegroundColorAttributeName];
         }
-        [_defaultAttributes setObject:self.textColor forKey:NSForegroundColorAttributeName];
+        if (self.textColor) {
+            [_defaultAttributes setObject:self.textColor forKey:NSForegroundColorAttributeName];
+        }
+        
     }
     return _defaultAttributes;
 }
@@ -509,3 +515,4 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 }
 
 @end
+

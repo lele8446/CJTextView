@@ -29,7 +29,7 @@
     self.textView.font = [UIFont systemFontOfSize:14];
     self.textView.myDelegate = self;
     self.textView.textColor = [UIColor blueColor];
-    self.textView.returnKeyType = UIReturnKeyDone;
+//    self.textView.returnKeyType = UIReturnKeyDone;
     //插入文本的颜色
     self.textView.specialTextColor = [UIColor redColor];
 }
