@@ -8,9 +8,12 @@
 
 #import "CJUITextView.h"
 
+#define CJTextViewIsNull(a) ((a)==nil || (a)==NULL || (NSNull *)(a)==[NSNull null])
+
 @interface CJUITextView()<UITextViewDelegate>
 {
     BOOL _hasRemoveObserver;
+    BOOL _shouldChangeText;
 }
 @property (nonatomic, strong) UILabel *placeHoldLabel;
 @property (nonatomic, assign) BOOL placeHoldLabelHidden;
@@ -369,27 +372,29 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
         
         UITextRange *newContentStr = [change objectForKey:@"new"];
         UITextRange *oldContentStr = [change objectForKey:@"old"];
-        NSRange newRange = [self selectedRange:self selectTextRange:newContentStr];
-        NSRange oldRange = [self selectedRange:self selectTextRange:oldContentStr];
-        if (newRange.location != oldRange.location) {
-            //判断光标移动，光标不能处在特殊文本内
-            [self.attributedText enumerateAttribute:SPECIAL_TEXT_NUM inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
-                //                NSLog(@"range = %@",NSStringFromRange(range));
-                if (attrs != nil && attrs != 0) {
-                    if (newRange.location > range.location && newRange.location < (range.location+range.length)) {
-                        //光标距离左边界的值
-                        NSUInteger leftValue = newRange.location - range.location;
-                        //光标距离右边界的值
-                        NSUInteger rightValue = range.location+range.length - newRange.location;
-                        if (leftValue >= rightValue) {
-                            self.selectedRange = NSMakeRange(self.selectedRange.location-leftValue, 0);
-                        }else{
-                            self.selectedRange = NSMakeRange(self.selectedRange.location+rightValue, 0);
+        if (!CJTextViewIsNull(newContentStr) && !CJTextViewIsNull(oldContentStr)) {
+            NSRange newRange = [self selectedRange:self selectTextRange:newContentStr];
+            NSRange oldRange = [self selectedRange:self selectTextRange:oldContentStr];
+            if (newRange.location != oldRange.location) {
+                //判断光标移动，光标不能处在特殊文本内
+                [self.attributedText enumerateAttribute:SPECIAL_TEXT_NUM inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+                    //                NSLog(@"range = %@",NSStringFromRange(range));
+                    if (attrs != nil && attrs != 0) {
+                        if (newRange.location > range.location && newRange.location < (range.location+range.length)) {
+                            //光标距离左边界的值
+                            NSUInteger leftValue = newRange.location - range.location;
+                            //光标距离右边界的值
+                            NSUInteger rightValue = range.location+range.length - newRange.location;
+                            if (leftValue >= rightValue) {
+                                self.selectedRange = NSMakeRange(self.selectedRange.location-leftValue, 0);
+                            }else{
+                                self.selectedRange = NSMakeRange(self.selectedRange.location+rightValue, 0);
+                            }
                         }
                     }
-                }
-                
-            }];
+                    
+                }];
+            }
         }
     }else{
         [super observeValueForKeyPath:path ofObject:object change:change context:context];
@@ -444,6 +449,7 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    _shouldChangeText = YES;
     self.typingAttributes = self.defaultAttributes;
     if ([text isEqualToString:@""] && !self.enableEditInsterText) {//删除
         __block BOOL deleteSpecial = NO;
@@ -488,10 +494,13 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 }
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
-    if (self.autoLayoutHeight) {
-        [self changeSize];
-    }else{
-        [self scrollRangeToVisible:NSMakeRange(self.text.length, 0)];
+    if (_shouldChangeText) {
+        if (self.autoLayoutHeight) {
+            [self changeSize];
+        }else{
+            [self scrollRangeToVisible:NSMakeRange(self.text.length, 0)];
+        }
+        _shouldChangeText = NO;
     }
     [self hiddenPlaceHoldLabel];
     self.typingAttributes = self.defaultAttributes;
