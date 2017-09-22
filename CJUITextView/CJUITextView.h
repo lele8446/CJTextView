@@ -45,8 +45,11 @@
 
 - (void)textViewDidChangeSelection:(CJUITextView *)textView;
 
-- (BOOL)textView:(CJUITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange NS_AVAILABLE_IOS(7_0);
-- (BOOL)textView:(CJUITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange NS_AVAILABLE_IOS(7_0);
+- (BOOL)textView:(CJUITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction NS_AVAILABLE_IOS(10_0);
+- (BOOL)textView:(CJUITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction NS_AVAILABLE_IOS(10_0);
+
+- (BOOL)textView:(CJUITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange NS_DEPRECATED_IOS(7_0, 10_0, "Use textView:shouldInteractWithURL:inRange:forInteractionType: instead");
+- (BOOL)textView:(CJUITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange NS_DEPRECATED_IOS(7_0, 10_0, "Use textView:shouldInteractWithURL:inRange:forInteractionType: instead");
 
 /**
  *  placeHoldLabel是否显示
@@ -107,11 +110,6 @@
 - (NSRange)insterSpecialTextAndGetSelectedRange:(NSAttributedString *)specialText
                                   selectedRange:(NSRange)selectedRange
                                            text:(NSAttributedString *)attributedText;
-
-/**
- *  CJUITextView直接显示富文本需先设置一下初始值显示效果才有效
- */
-- (void)installStatus;
 
 /**
  * dealloc方法时，主动移除CJUITextView内部的相关KVO监测

@@ -14,10 +14,12 @@
 {
     BOOL _hasRemoveObserver;
     BOOL _shouldChangeText;
+    BOOL _enterDone;
+    BOOL _afterLayout;
 }
 @property (nonatomic, strong) UILabel *placeHoldLabel;
 @property (nonatomic, assign) BOOL placeHoldLabelHidden;
-@property (nonatomic, strong) NSMutableDictionary *defaultAttributes;
+@property (nonatomic, strong) NSDictionary *defaultAttributes;
 @property (nonatomic, assign) NSUInteger specialTextNum;//记录特殊文本的索引值
 @property (nonatomic, assign) CGRect defaultFrame;//初始frame值
 @property (nonatomic, assign) int addObserverTime;//注册KVO的次数
@@ -39,24 +41,6 @@
         [self addSubview:_placeHoldLabel];
     }
     return _placeHoldLabel;
-}
-
-- (NSMutableDictionary *)defaultAttributes {
-    if (!_defaultAttributes) {
-        _defaultAttributes = [NSMutableDictionary dictionary];
-        if (self.font) {
-            [_defaultAttributes setObject:self.font forKey:NSFontAttributeName];
-        }
-        if (!self.textColor || self.textColor == nil) {
-            self.textColor = [UIColor blackColor];
-            [_defaultAttributes setObject:[UIColor blackColor] forKey:NSForegroundColorAttributeName];
-        }
-        if (self.textColor) {
-            [_defaultAttributes setObject:self.textColor forKey:NSForegroundColorAttributeName];
-        }
-        
-    }
-    return _defaultAttributes;
 }
 
 - (void)setPlaceHoldContainerInset:(UIEdgeInsets)placeHoldContainerInset {
@@ -82,13 +66,10 @@
 - (void)setAutoLayoutHeight:(BOOL)autoLayoutHeight {
     _autoLayoutHeight = autoLayoutHeight;
     if (_autoLayoutHeight) {
-        //高度自动调整的时候，不自动联想
-        self.autocorrectionType = UITextAutocorrectionTypeNo;
         if (self.maxHeight == 0) {
             self.maxHeight = MAXFLOAT;
         }
-    }else{
-        self.autocorrectionType = UITextAutocorrectionTypeDefault;
+        self.layoutManager.allowsNonContiguousLayout = NO;
     }
 }
 
@@ -152,15 +133,22 @@
     self.placeHoldContainerInset = UIEdgeInsetsMake(4, 4, 4, 4);
     self.font = [UIFont systemFontOfSize:14];
     self.delegate = self;
-    self.layoutManager.allowsNonContiguousLayout = NO;
+    self.defaultFrame = CGRectNull;
+    self.defaultAttributes = self.typingAttributes;
     [self addObserverForTextView];
     [self hiddenPlaceHoldLabel];
 }
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    if (!_afterLayout) {
+        self.defaultFrame = self.frame;
+        [self placeHoldLabelFrame];
+    }
+}
+
 - (void)drawRect:(CGRect)rect {
     [super drawRect:rect];
-    self.defaultFrame = self.frame;
-    [self placeHoldLabelFrame];
 }
 
 - (void)hiddenPlaceHoldLabel {
@@ -168,7 +156,6 @@
         self.placeHoldLabel.hidden = YES;
     }else{
         self.placeHoldLabel.hidden = NO;
-        [self placeHoldLabelFrame];
     }
     if (self.placeHoldLabelHidden != self.placeHoldLabel.hidden) {
         self.placeHoldLabelHidden = self.placeHoldLabel.hidden;
@@ -182,18 +169,8 @@
     CGFloat height = 24;
     if (height > self.defaultFrame.size.height-self.placeHoldContainerInset.top-self.placeHoldContainerInset.bottom) {
         height = self.defaultFrame.size.height-self.placeHoldContainerInset.top-self.placeHoldContainerInset.bottom;
-        //文字内边距为0
-        //        self.textContainerInset = UIEdgeInsetsMake(0, 0, 0, 0);
     }
     self.placeHoldLabel.frame = CGRectMake(self.placeHoldContainerInset.left,self.placeHoldContainerInset.top, self.defaultFrame.size.width - self.placeHoldContainerInset.left-self.placeHoldContainerInset.right, height);
-    [self layoutIfNeeded];
-    
-    if (self.frame.size.height <= self.defaultFrame.size.height) {
-        self.contentSize = CGSizeMake(self.defaultFrame.size.width, self.defaultFrame.size.height);
-        [self layoutIfNeeded];
-        self.textContainerInset = UIEdgeInsetsMake(8, 0, 8, 0);
-        [self layoutIfNeeded];
-    }
 }
 
 - (void)changeSize {
@@ -209,8 +186,8 @@
         if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:heightChanged:)]) {
             [self.myDelegate CJUITextView:self heightChanged:oriFrame];
         }
+        [self layoutIfNeeded];
     }
-    [self scrollRangeToVisible:NSMakeRange(self.text.length, 0)];
 }
 
 /**
@@ -248,6 +225,7 @@
                                   selectedRange:(NSRange)selectedRange
                                            text:(NSAttributedString *)attributedText
 {
+    _shouldChangeText = YES;
     //针对输入时，文本内容为空，直接插入特殊文本的处理
     if (self.text.length == 0) {
         [self installStatus];
@@ -471,8 +449,10 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
         return !deleteSpecial;
     }
     
+    _enterDone = NO;
     //输入了done
     if ([text isEqualToString:@"\n"]) {
+        _enterDone = YES;
         if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewEnterDone:)]) {
             [self.myDelegate CJUITextViewEnterDone:self];
         }
@@ -494,22 +474,41 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 }
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
+    _afterLayout = YES;
+    self.typingAttributes = self.defaultAttributes;
     if (_shouldChangeText) {
         if (self.autoLayoutHeight) {
             [self changeSize];
         }else{
-            [self scrollRangeToVisible:NSMakeRange(self.text.length, 0)];
+            textView.layoutManager.allowsNonContiguousLayout = YES;
+            if ((self.selectedRange.location+self.selectedRange.length) == (self.text.length)) {
+                if (_enterDone) {
+                    textView.layoutManager.allowsNonContiguousLayout = NO;
+                    [self scrollRangeToVisible:NSMakeRange(self.selectedRange.location+self.selectedRange.length, 0)];
+                }
+            }
         }
         _shouldChangeText = NO;
     }
     [self hiddenPlaceHoldLabel];
-    self.typingAttributes = self.defaultAttributes;
     
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textViewDidChangeSelection:)]) {
         [self.myDelegate textViewDidChangeSelection:self];
     }
 }
 
+- (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction {
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textView:shouldInteractWithURL:inRange:interaction:)]) {
+        return [self.myDelegate textView:self shouldInteractWithURL:URL inRange:characterRange interaction:interaction];
+    }
+    return YES;
+}
+- (BOOL)textView:(UITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction {
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textView:shouldInteractWithTextAttachment:inRange:interaction:)]) {
+        return [self.myDelegate textView:self shouldInteractWithTextAttachment:textAttachment inRange:characterRange interaction:interaction];
+    }
+    return YES;
+}
 - (BOOL)textView:(CJUITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange {
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textView:shouldInteractWithURL:inRange:)]) {
         return [self.myDelegate textView:self shouldInteractWithURL:URL inRange:characterRange];
