@@ -16,8 +16,8 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "CJTextView"
-  s.version      = "1.0.0"
-  s.summary      = "自定义UITextView"
+  s.version      = "1.0.1"
+  s.summary      = "自定义UITextView，显示默认提示语，自动调整高度，编辑可插入@人名，#标签#。"
   s.homepage     = "https://github.com/lele8446/TextViewDemo"
 
   s.license      = { :type => 'Apache License, Version 2.0', :text => <<-LICENSE
@@ -36,7 +36,7 @@ Pod::Spec.new do |s|
   }
   s.author       = { "lele8446" => "641003000@qq.com" }
   s.platform     = :ios, "7.0"
-  s.source       = { :git => "https://github.com/lele8446/TextViewDemo.git", :tag => "1.0.0" }
+  s.source       = { :git => "https://github.com/lele8446/TextViewDemo.git", :tag => "1.0.1" }
   s.source_files  = "CJUITextView/*"
 
   
