@@ -225,7 +225,6 @@
                                   selectedRange:(NSRange)selectedRange
                                            text:(NSAttributedString *)attributedText
 {
-    _shouldChangeText = YES;
     //针对输入时，文本内容为空，直接插入特殊文本的处理
     if (self.text.length == 0) {
         [self installStatus];
@@ -297,6 +296,8 @@
     self.attributedText = newTextStr;
     NSRange newSelsctRange = NSMakeRange(selectedRange.location+specialTextAttStr.length, 0);
     self.selectedRange = newSelsctRange;
+    [self changeSize];
+    [self scrollRangeToVisible:NSMakeRange(self.selectedRange.location+self.selectedRange.length, 0)];
     return newSelsctRange;
 }
 
