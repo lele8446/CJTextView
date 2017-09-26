@@ -25,10 +25,17 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (IBAction)push:(id)sender {
+- (IBAction)clickEdit:(id)sender {
     UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
     //由storyboard根据myView的storyBoardID来获取我们要切换的视图
     ViewController *aViewCtr = [story instantiateViewControllerWithIdentifier:@"ViewControllerStr"];
+    [self.navigationController pushViewController:aViewCtr animated:YES];
+}
+
+- (IBAction)clickDisplay:(id)sender {
+    UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
+    //由storyboard根据myView的storyBoardID来获取我们要切换的视图
+    ViewController *aViewCtr = [story instantiateViewControllerWithIdentifier:@"SecondViewController"];
     [self.navigationController pushViewController:aViewCtr animated:YES];
 }
 @end

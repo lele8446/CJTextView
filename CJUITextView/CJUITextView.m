@@ -2,13 +2,27 @@
 //  CJUITextView.m
 //  TextViewDemo
 //
-//  Created by YiChe on 16/6/26.
-//  Copyright © 2016年 YiChe. All rights reserved.
+//  Created by C.K.Lian on 16/6/26.
+//  Copyright © 2016年 C.K.Lian. All rights reserved.
 //
 
 #import "CJUITextView.h"
 
 #define CJTextViewIsNull(a) ((a)==nil || (a)==NULL || (NSNull *)(a)==[NSNull null])
+
+NSString * const SPECIAL_TEXT_NUM = @"SPECIAL_TEXT_NUM";
+//标记插入文本的索引值
+NSString * const kCJInsterSpecialTextKeyAttributeName         = @"kCJInsterSpecialTextKeyAttributeName";
+//标记相同的插入文本
+NSString * const kCJInsterSpecialTextKeyGroupAttributeName    = @"kCJInsterSpecialTextKeyGroupAttributeName";
+//标记插入文本的range
+NSString * const kCJInsterSpecialTextRangeAttributeName       = @"kCJInsterSpecialTextRangeAttributeName";
+//标记插入文本的自定义参数
+NSString * const kCJInsterSpecialTextParameterAttributeName   = @"kCJInsterSpecialTextParameterAttributeName";
+//标记正常编辑的文本
+NSString * const kCJTextAttributeName                         = @"kCJTextAttributeName";
+//标记未设置标志符的插入文本
+NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefaultGroupAttributeName";
 
 @interface CJUITextView()<UITextViewDelegate>
 {
@@ -27,6 +41,7 @@
 @end
 
 @implementation CJUITextView
+@dynamic delegate ;
 
 - (UILabel *)placeHoldLabel {
     if (!_placeHoldLabel) {
@@ -91,7 +106,6 @@
 }
 
 - (void)dealloc {
-    self.delegate = nil;
     self.myDelegate = nil;
     
     float iOSVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
@@ -104,18 +118,10 @@
     }
 }
 
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        [self commonInitialize];
-    }
-    return self;
-}
-
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        [self commonInitialize];
+        [self commonInit];
     }
     return self;
 }
@@ -123,18 +129,19 @@
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        [self commonInitialize];
+        [self commonInit];
     }
     return self;
 }
 
-- (void)commonInitialize {
+- (void)commonInit {
     self.specialTextNum = 1;
     self.placeHoldContainerInset = UIEdgeInsetsMake(4, 4, 4, 4);
     self.font = [UIFont systemFontOfSize:14];
-    self.delegate = self;
     self.defaultFrame = CGRectNull;
     self.defaultAttributes = self.typingAttributes;
+    //由于delegate 被声明为 unavailable，这里只能通过kvc的方式设置了
+    [self setValue:self forKey:@"delegate"];
     [self addObserverForTextView];
     [self hiddenPlaceHoldLabel];
 }
@@ -145,10 +152,6 @@
         self.defaultFrame = self.frame;
         [self placeHoldLabelFrame];
     }
-}
-
-- (void)drawRect:(CGRect)rect {
-    [super drawRect:rect];
 }
 
 - (void)hiddenPlaceHoldLabel {
@@ -207,8 +210,8 @@
     NSMutableAttributedString *resultAttStr = [[NSMutableAttributedString alloc]initWithString:resultString];
     [attString enumerateAttributesInRange:withRange options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
         NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:attrs];
-        if (attrs[SPECIAL_TEXT_NUM] && [attrs[SPECIAL_TEXT_NUM] integerValue] != 0) {
-            self.specialTextNum = self.specialTextNum > [attrs[SPECIAL_TEXT_NUM] integerValue]?self.specialTextNum:[attrs[SPECIAL_TEXT_NUM] integerValue];
+        if (attrs[kCJInsterSpecialTextKeyAttributeName] && ![attrs[kCJInsterSpecialTextKeyAttributeName] isEqualToString:kCJTextAttributeName]) {
+            self.specialTextNum = self.specialTextNum > [attrs[kCJInsterSpecialTextKeyAttributeName] hash]?self.specialTextNum:[attrs[kCJInsterSpecialTextKeyAttributeName] hash];
             [dic setObject:self.specialTextColor forKey:NSForegroundColorAttributeName];
         }else{
             if (!self.textColor || self.textColor == nil) {
@@ -221,17 +224,13 @@
     return resultAttStr;
 }
 
-- (NSRange)insterSpecialTextAndGetSelectedRange:(NSAttributedString *)specialText
-                                  selectedRange:(NSRange)selectedRange
-                                           text:(NSAttributedString *)attributedText
-{
-    //针对输入时，文本内容为空，直接插入特殊文本的处理
-    if (self.text.length == 0) {
-        [self installStatus];
+- (NSMutableAttributedString *)instertAttributedString:(NSAttributedString *)attStr {
+    if (attStr.length == 0) {
+        return [[NSMutableAttributedString alloc] init];
     }
-    NSMutableAttributedString *specialTextAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:specialText];
-    NSRange specialRange = NSMakeRange(0, specialText.length);
-    NSDictionary *dicAtt = [specialText attributesAtIndex:0 effectiveRange:&specialRange];
+    NSMutableAttributedString *specialTextAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:attStr];
+    NSRange specialRange = NSMakeRange(0, attStr.length);
+    NSDictionary *dicAtt = [attStr attributesAtIndex:0 effectiveRange:&specialRange];
     //设置默认字体属性
     UIFont *font = dicAtt[NSFontAttributeName];
     UIFont *defaultFont = [UIFont fontWithName:@"HelveticaNeue" size:12.0];//默认字体
@@ -244,7 +243,18 @@
         color = self.specialTextColor;
         [specialTextAttStr addAttribute:NSForegroundColorAttributeName value:color range:specialRange];
     }
-    self.specialTextColor = color;
+    return specialTextAttStr;
+}
+
+- (NSRange)insterSpecialTextAndGetSelectedRange:(NSAttributedString *)specialText
+                                  selectedRange:(NSRange)selectedRange
+                                           text:(NSAttributedString *)attributedText
+{
+    //针对输入时，文本内容为空，直接插入特殊文本的处理
+    if (self.text.length == 0) {
+        [self installStatus];
+    }
+    NSMutableAttributedString *specialTextAttStr = [self instertAttributedString:specialText];
     
     NSMutableAttributedString *headTextAttStr = [[NSMutableAttributedString alloc] init];
     NSMutableAttributedString *tailTextAttStr = [[NSMutableAttributedString alloc] init];
@@ -274,7 +284,7 @@
     
     //为插入文本增加SPECIAL_TEXT_NUM索引
     self.specialTextNum ++;
-    [specialTextAttStr addAttribute:SPECIAL_TEXT_NUM value:@(self.specialTextNum) range:specialRange];
+    [specialTextAttStr addAttribute:kCJInsterSpecialTextKeyAttributeName value:[NSString stringWithFormat:@"%@",@(self.specialTextNum)] range:NSMakeRange(0, specialTextAttStr.length)];
     
     NSMutableAttributedString *newTextStr = [[NSMutableAttributedString alloc] init];
     
@@ -296,9 +306,137 @@
     self.attributedText = newTextStr;
     NSRange newSelsctRange = NSMakeRange(selectedRange.location+specialTextAttStr.length, 0);
     self.selectedRange = newSelsctRange;
-    [self changeSize];
+    if (self.autoLayoutHeight) {
+        [self changeSize];
+    }
     [self scrollRangeToVisible:NSMakeRange(self.selectedRange.location+self.selectedRange.length, 0)];
     return newSelsctRange;
+}
+
+- (NSRange)insertSpecialText:(CJTextViewModel *)textModel atIndex:(NSUInteger)loc {
+    //针对输入时，文本内容为空，直接插入特殊文本的处理
+    if (self.text.length == 0) {
+        [self installStatus];
+    }
+    
+    if (self.attributedText.length == 0) {
+        loc = 0;
+    }else{
+        if (loc >= self.attributedText.length) {
+            loc = self.attributedText.length;
+        }
+    }
+
+    NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:[self handleEditTextModel]];
+    
+    NSRange selectedRange = self.selectedRange;
+    
+    NSMutableAttributedString *insertTextAttStr = [self instertAttributedString:textModel.attrString];
+    NSString *insertKeyGroup = (textModel.specialKey && textModel.specialKey.length > 0)?textModel.specialKey:kCJInsterDefaultGroupAttributeName;
+    [insertTextAttStr addAttribute:kCJInsterSpecialTextKeyGroupAttributeName value:insertKeyGroup range:NSMakeRange(0, insertTextAttStr.length)];
+    //插入key
+    NSString *insertKey = [NSUUID UUID].UUIDString;
+    [insertTextAttStr addAttribute:kCJInsterSpecialTextKeyAttributeName value:insertKey range:NSMakeRange(0, insertTextAttStr.length)];
+    //插入range
+    NSRange insertRange = NSMakeRange(loc, insertTextAttStr.length);
+    [insertTextAttStr addAttribute:kCJInsterSpecialTextRangeAttributeName value:NSStringFromRange(insertRange) range:NSMakeRange(0, insertTextAttStr.length)];
+    //插入参数
+    if (textModel.parameter) {
+        [insertTextAttStr addAttribute:kCJInsterSpecialTextParameterAttributeName value:textModel.parameter range:NSMakeRange(0, insertTextAttStr.length)];
+    }
+    
+    [textAttStr insertAttributedString:insertTextAttStr atIndex:loc];
+    self.attributedText = textAttStr;
+    NSRange newSelsctRange = NSMakeRange(selectedRange.location+selectedRange.length+insertTextAttStr.length, 0);
+    if (self.autoLayoutHeight) {
+        [self changeSize];
+    }
+    [self scrollRangeToVisible:NSMakeRange(newSelsctRange.location+newSelsctRange.length, 0)];
+    self.selectedRange = newSelsctRange;
+    return newSelsctRange;
+}
+
+- (NSArray <CJTextViewModel *>*)insertTextModelWithKey:(NSString *)specialStrKey {
+    __block NSArray *array = nil;
+    //遍历相同的KeyGroup
+    [self.attributedText enumerateAttribute:kCJInsterSpecialTextKeyGroupAttributeName inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+        
+        NSMutableAttributedString *rangeText = [[NSMutableAttributedString alloc]initWithAttributedString:[self.attributedText attributedSubstringFromRange:range]];
+        NSRange rangeTextRange = NSMakeRange(0, rangeText.length);
+        NSDictionary* dicAtt = @{};
+        if (!NSEqualRanges(rangeTextRange,NSMakeRange(0, 0))) {
+            dicAtt = [rangeText attributesAtIndex:0 effectiveRange:&rangeTextRange];
+        }
+        if (dicAtt.count > 0) {
+            NSString *keyGroup = dicAtt[kCJInsterSpecialTextKeyGroupAttributeName];
+            if (keyGroup.length > 0 && specialStrKey.length > 0) {
+                if ([keyGroup isEqualToString:specialStrKey]) {
+                    array = [self textModelFromAttributedString:rangeText insert:YES rangeTextRange:rangeTextRange];
+                }
+            }
+        }
+    }];
+    return array;
+}
+
+- (NSArray <CJTextViewModel *>*)allInsertTextModel {
+    NSArray *array = [self textModelFromAttributedString:self.attributedText insert:YES rangeTextRange:NSMakeRange(0, self.attributedText.length)];
+    return array;
+}
+
+- (NSArray <CJTextViewModel *>*)allTextModel {
+    NSArray *array = [self textModelFromAttributedString:self.attributedText insert:NO rangeTextRange:NSMakeRange(0, self.attributedText.length)];
+    return array;
+}
+
+- (NSArray <CJTextViewModel *>*)textModelFromAttributedString:(NSAttributedString *)attributedString
+                                                       insert:(BOOL)insert
+                                               rangeTextRange:(NSRange)rangeTextRange
+{
+    
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:3];
+    [attributedString enumerateAttribute:kCJInsterSpecialTextKeyAttributeName inRange:NSMakeRange(0, attributedString.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+        
+        NSString *key = (NSString *)attrs;
+        BOOL condition = NO;
+        if (insert) {
+            condition = (key.length > 0 && ![key isEqualToString:kCJTextAttributeName]);
+        }else{
+            condition = key.length > 0;
+        }
+        if (condition) {
+            
+            NSMutableAttributedString *sText = [[NSMutableAttributedString alloc]initWithAttributedString:[attributedString attributedSubstringFromRange:range]];
+            
+            NSDictionary *modelAttrs = [sText attributesAtIndex:0 effectiveRange:&range];
+            NSString *specialStrKey = modelAttrs[kCJInsterSpecialTextKeyGroupAttributeName];
+            NSString *rangeStr = modelAttrs[kCJInsterSpecialTextRangeAttributeName];
+            id parameter = modelAttrs[kCJInsterSpecialTextParameterAttributeName];
+            
+            NSRange modelRange = NSMakeRange(rangeTextRange.location+range.location, range.length);
+            if (rangeStr.length > 0) {
+                modelRange = NSRangeFromString(rangeStr);
+            }
+            CJTextViewModel *model = [CJTextViewModel textViewModelKey:specialStrKey attrString:sText parameter:parameter];
+            model.range = modelRange;
+            
+            [array insertObject:model atIndex:0];
+        }
+    }];
+    return array;
+}
+
+- (NSAttributedString *)handleEditTextModel {
+    NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
+    [textAttStr.string enumerateSubstringsInRange:NSMakeRange(0, [textAttStr.string length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:
+     ^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
+         NSDictionary *dicAtt = [textAttStr attributesAtIndex:substringRange.location effectiveRange:&substringRange];
+         if (CJTextViewIsNull(dicAtt[kCJInsterSpecialTextKeyAttributeName])) {
+             [textAttStr addAttribute:kCJInsterSpecialTextKeyAttributeName value:kCJTextAttributeName range:substringRange];
+         }
+     }];
+    self.attributedText = textAttStr;
+    return textAttStr;
 }
 
 //CJUITextView直接显示富文本需先设置一下初始值显示效果才有效
@@ -356,9 +494,9 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
             NSRange oldRange = [self selectedRange:self selectTextRange:oldContentStr];
             if (newRange.location != oldRange.location) {
                 //判断光标移动，光标不能处在特殊文本内
-                [self.attributedText enumerateAttribute:SPECIAL_TEXT_NUM inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
-                    //                NSLog(@"range = %@",NSStringFromRange(range));
-                    if (attrs != nil && attrs != 0) {
+                [self.attributedText enumerateAttribute:kCJInsterSpecialTextKeyAttributeName inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+                    NSString *key = (NSString *)attrs;
+                    if (key && ![key isEqualToString:kCJTextAttributeName]) {
                         if (newRange.location > range.location && newRange.location < (range.location+range.length)) {
                             //光标距离左边界的值
                             NSUInteger leftValue = newRange.location - range.location;
@@ -404,26 +542,27 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 
 #pragma mark - UITextViewDelegate
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textViewShouldBeginEditing:)]) {
-        return [self.myDelegate textViewShouldBeginEditing:self];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewShouldBeginEditing:)]) {
+        return [self.myDelegate CJUITextViewShouldBeginEditing:self];
     }
     return YES;
 }
 - (BOOL)textViewShouldEndEditing:(UITextView *)textView {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textViewShouldEndEditing:)]) {
-        return [self.myDelegate textViewShouldEndEditing:self];
+    [self handleEditTextModel];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewShouldEndEditing:)]) {
+        return [self.myDelegate CJUITextViewShouldEndEditing:self];
     }
     return YES;
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textViewDidBeginEditing:)]) {
-        [self.myDelegate textViewDidBeginEditing:self];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidBeginEditing:)]) {
+        [self.myDelegate CJUITextViewDidBeginEditing:self];
     }
 }
 - (void)textViewDidEndEditing:(UITextView *)textView {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textViewDidEndEditing:)]) {
-        [self.myDelegate textViewDidEndEditing:self];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidEndEditing:)]) {
+        [self.myDelegate CJUITextViewDidEndEditing:self];
     }
 }
 
@@ -434,9 +573,10 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
         __block BOOL deleteSpecial = NO;
         NSRange oldRange = textView.selectedRange;
         
-        [textView.attributedText enumerateAttribute:SPECIAL_TEXT_NUM inRange:NSMakeRange(0, textView.selectedRange.location) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+        [textView.attributedText enumerateAttribute:kCJInsterSpecialTextKeyAttributeName inRange:NSMakeRange(0, textView.selectedRange.location) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
             NSRange deleteRange = NSMakeRange(textView.selectedRange.location-1, 0) ;
-            if (attrs != nil && attrs != 0) {
+            NSString *key = (NSString *)attrs;
+            if (key && ![key isEqualToString:kCJTextAttributeName]) {
                 if (deleteRange.location > range.location && deleteRange.location < (range.location+range.length)) {
                     NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:textView.attributedText];
                     [textAttStr deleteCharactersInRange:range];
@@ -463,14 +603,14 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
         }
     }
     
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textView:shouldChangeTextInRange:replacementText:)]) {
-        return [self.myDelegate textView:self shouldChangeTextInRange:range replacementText:text];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:shouldChangeTextInRange:replacementText:)]) {
+        return [self.myDelegate CJUITextView:self shouldChangeTextInRange:range replacementText:text];
     }
     return YES;
 }
 - (void)textViewDidChange:(UITextView *)textView {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textViewDidChange:)]) {
-        [self.myDelegate textViewDidChange:self];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidChange:)]) {
+        [self.myDelegate CJUITextViewDidChange:self];
     }
 }
 
@@ -493,35 +633,56 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
     }
     [self hiddenPlaceHoldLabel];
     
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textViewDidChangeSelection:)]) {
-        [self.myDelegate textViewDidChangeSelection:self];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidChangeSelection:)]) {
+        [self.myDelegate CJUITextViewDidChangeSelection:self];
     }
 }
 
 - (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textView:shouldInteractWithURL:inRange:interaction:)]) {
-        return [self.myDelegate textView:self shouldInteractWithURL:URL inRange:characterRange interaction:interaction];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:shouldInteractWithURL:inRange:interaction:)]) {
+        return [self.myDelegate CJUITextView:self shouldInteractWithURL:URL inRange:characterRange interaction:interaction];
     }
     return YES;
 }
 - (BOOL)textView:(UITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textView:shouldInteractWithTextAttachment:inRange:interaction:)]) {
-        return [self.myDelegate textView:self shouldInteractWithTextAttachment:textAttachment inRange:characterRange interaction:interaction];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:shouldInteractWithTextAttachment:inRange:interaction:)]) {
+        return [self.myDelegate CJUITextView:self shouldInteractWithTextAttachment:textAttachment inRange:characterRange interaction:interaction];
     }
     return YES;
 }
 - (BOOL)textView:(CJUITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textView:shouldInteractWithURL:inRange:)]) {
-        return [self.myDelegate textView:self shouldInteractWithURL:URL inRange:characterRange];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:shouldInteractWithURL:inRange:)]) {
+        return [self.myDelegate CJUITextView:self shouldInteractWithURL:URL inRange:characterRange];
     }
     return YES;
 }
 - (BOOL)textView:(CJUITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange {
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(textView:shouldInteractWithTextAttachment:inRange:)]) {
-        return [self.myDelegate textView:self shouldInteractWithTextAttachment:textAttachment inRange:characterRange];
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:shouldInteractWithTextAttachment:inRange:)]) {
+        return [self.myDelegate CJUITextView:self shouldInteractWithTextAttachment:textAttachment inRange:characterRange];
     }
     return YES;
 }
-
 @end
 
+@implementation CJTextViewModel
+
++ (CJTextViewModel *)textViewModelKey:(NSString *)specialKey
+                           attrString:(NSAttributedString *)attrString
+                            parameter:(id)parameter
+{
+    CJTextViewModel *model = [[CJTextViewModel alloc]init];
+    model.specialKey = specialKey;
+    model.attrString = attrString;
+    model.parameter = parameter;
+    return model;
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    CJTextViewModel *model = [[CJTextViewModel alloc]init];
+    model.range = self.range;
+    model.specialKey = self.specialKey;
+    model.attrString = self.attrString;
+    model.parameter = self.parameter;
+    return model;
+}
+@end

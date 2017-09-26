@@ -14,7 +14,6 @@
 @implementation ViewController
 
 - (void)dealloc {
-    self.textView.myDelegate = nil;
     [self.textView removeObserver];
 }
 
@@ -25,13 +24,13 @@
     self.textView.autoLayoutHeight = YES;
 //    self.textView.enableEditInsterText = YES;
     self.textView.placeHoldString = @"请输入...";
-//    self.textView.placeHoldTextFont = [UIFont systemFontOfSize:14];
     self.textView.font = [UIFont systemFontOfSize:14];
     self.textView.myDelegate = self;
     self.textView.textColor = [UIColor blueColor];
 //    self.textView.returnKeyType = UIReturnKeyDone;
     //插入文本的颜色
     self.textView.specialTextColor = [UIColor redColor];
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -43,66 +42,77 @@
     [super viewDidAppear:animated];
 }
 
+- (IBAction)clickSwitch:(id)sender {
+    self.textView.autoLayoutHeight = self.switchButton.on;
+    if (!self.switchButton.on) {
+        self.textViewHeight.constant = 60;
+    }else{
+        CGFloat height = [self.textView sizeThatFits:CGSizeMake(self.textView.frame.size.width, MAXFLOAT)].height;
+        height = MIN(height, 120);
+        self.textViewHeight.constant = height;
+    }
+}
+
 - (IBAction)insertTextclick:(id)sender {
     [self.textView becomeFirstResponder];
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#插入文本#"];
-//    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@""];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#主题#"];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
-    [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
+    CJTextViewModel *model = [CJTextViewModel textViewModelKey:@"主题" attrString:str parameter:@{@"key":@"插入主题"}];
+    [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
 }
 
 - (IBAction)insertTextclick2:(id)sender {
     [self.textView becomeFirstResponder];
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"@特殊文本"];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"@人名"];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
-    [self.textView insterSpecialTextAndGetSelectedRange:str selectedRange:self.textView.selectedRange text:self.textView.attributedText];
+    [str addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0, str.length)];
+    CJTextViewModel *model = [CJTextViewModel textViewModelKey:@"人名" attrString:str parameter:@"参数"];
+    [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
     [self.textView resignFirstResponder];
-    self.label.attributedText = self.textView.attributedText;
-    if (self.textView.attributedText.length == 0) {
-        self.label.text = @"显示输入内容";
-    }
+    NSArray *userModel = [self.textView insertTextModelWithKey:@"人名"];
+    NSArray *allInsertModel = [self.textView allInsertTextModel];
+    NSArray *allModel = [self.textView allTextModel];
+    NSLog(@"@人名 = %@",userModel);
+    NSLog(@"所有插入字符 = %@",allInsertModel);
+    NSLog(@"所有model = %@",allModel);
 }
 
 #pragma mark - CJUITextViewDelegate
 - (void)CJUITextViewEnterDone:(CJUITextView *)textView {
-    NSAttributedString *text = textView.attributedText;
-    self.label.attributedText = text;
-    if (text.length == 0) {
-        self.label.text = @"显示输入内容";
-    }
+    
 }
 
 - (void)CJUITextView:(CJUITextView *)textView heightChanged:(CGRect)frame {
     self.textViewHeight.constant = frame.size.height;
 }
 
-- (BOOL)textViewShouldBeginEditing:(CJUITextView *)textView {
-
+- (BOOL)CJUITextViewShouldBeginEditing:(CJUITextView *)textView {
+    NSLog(@"CJUITextViewShouldBeginEditing");
     return YES;
 }
-- (BOOL)textViewShouldEndEditing:(CJUITextView *)textView {
+- (BOOL)CJUITextViewShouldEndEditing:(CJUITextView *)textView {
     return YES;
 }
 
-- (void)textViewDidBeginEditing:(CJUITextView *)textView {
+- (void)CJUITextViewDidBeginEditing:(CJUITextView *)textView {
     
 }
-- (void)textViewDidEndEditing:(CJUITextView *)textView {
-    
+- (void)CJUITextViewDidEndEditing:(CJUITextView *)textView {
+
 }
 
-- (BOOL)textView:(CJUITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+- (BOOL)CJUITextView:(CJUITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
     
     return YES;
 }
-- (void)textViewDidChange:(CJUITextView *)textView {
+- (void)CJUITextViewDidChange:(CJUITextView *)textView {
     
 }
 
-- (void)textViewDidChangeSelection:(CJUITextView *)textView {
+- (void)CJUITextViewDidChangeSelection:(CJUITextView *)textView {
     
 }
 
@@ -110,7 +120,7 @@
     
 }
 - (void)CJUITextView:(CJUITextView *)textView changeSelectedRange:(NSRange)selectedRange {
-    NSLog(@"选中文本 selectedRange = %@",NSStringFromRange(selectedRange));
+    NSLog(@"改变选中文本 selectedRange = %@",NSStringFromRange(selectedRange));
     
 }
 @end
