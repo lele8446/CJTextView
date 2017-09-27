@@ -7,31 +7,66 @@
 //
 
 #import "SecondViewController.h"
-#import "CJUITextView.h"
-#import "CJDisplayTextView.h"
 
-@interface SecondViewController ()<CJUITextViewDelegate>
-@property (nonatomic, weak) IBOutlet CJDisplayTextView *textView;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint *textViewHeight;
+@interface SecondViewController ()
+@property (nonatomic, strong) NSAttributedString *textAttStr;
 @end
 
 @implementation SecondViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-//    self.textView.textViewModel = DisplayModelType;
-//    self.textView.text = @"IQKeyboardManager应该www.baidu.com都不陌生，现在要求在点击Done按钮github.com的 北京市海淀区首体南路5号 同时执行自定义事件myAction。分13675547656析源y.com码发现Done按钮对应的方法- (void)doneAction:(IQBarButtonItem*)barButton在IQKeyboardManager.m中，对于这个私有方法貌641003000@qq.com似只能通过修改IQKeyboardManager.m源码来进行扩展了，http://www.jianshu.com/p/cfe338e2e9e5 但奈何项目是用CocoaPods进行管理的，如果直接修改三方库源码也就意味 2017-09-19 11:20:10 着IQKeyboardManager需要从CocoaPods管理中移除，这对于有强迫症的人来说自然是不能忍的😣😣";
-//    self.textView.myDelegate = self;
-    self.textView.editable = YES;
+    
+    if (self.textAttStr.length > 0) {
+        self.textView.attributedText = self.textAttStr;
+    }
+    else{
+        NSString *str = @"CJDisplayTextView是继承自UITextView的自定义控件，它只支持浏览模式，不允许编辑。它可以根据显示内容动态调整高度，并自动识别网址、日期、地址、电话，点击则触发系统默认行为；同时允许插入自定义点击链点，自定义链点请通过类方法`+linkStr:attributes:parameter:`生成，点击自定义链点会触发点击回调block和长按回调（长按只支持iOS10之后的系统）。相关链接https://github.com/lele8446/TextViewDemo 更多……";
+        
+        NSMutableParagraphStyle *paragraph = [[NSMutableParagraphStyle alloc] init];
+        paragraph.lineSpacing = 5;
+        paragraph.alignment = NSTextAlignmentLeft;
+        NSDictionary *attDic = @{NSFontAttributeName:[UIFont systemFontOfSize:14],
+                                 NSForegroundColorAttributeName:[UIColor blackColor],
+                                 NSParagraphStyleAttributeName:paragraph};
+        
+        NSDictionary *linkDic = @{NSFontAttributeName:[UIFont systemFontOfSize:14],
+                                  NSUnderlineStyleAttributeName:@1,
+                                  NSForegroundColorAttributeName:[UIColor blueColor],
+                                  NSParagraphStyleAttributeName:paragraph};
+        //
+        //    NSDictionary *afterLinkDic = @{NSForegroundColorAttributeName:[UIColor redColor]};
+        
+        NSAttributedString *linkStr = [CJDisplayTextView linkStr:@"@用户" attributes:linkDic parameter:@"用户id"];
+        
+        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithString:str attributes:attDic];
+        [attStr insertAttributedString:linkStr atIndex:111];
+        
+        self.textView.attributedText = attStr;
+    }
+    
+    __weak typeof(self)wSelf = self;
+    self.textView.displayViewLayoutBlock = ^(CGSize size){
+        wSelf.textViewHeight.constant = size.height;
+    };
+    self.textView.clickBlock = ^(NSAttributedString *linkAttstr, id parameter){
+        NSLog(@"点击 linkAttstr = %@",linkAttstr);
+        NSLog(@"点击 parameter = %@",parameter);
+    };
+    self.textView.pressBlock = ^(NSAttributedString *linkAttstr, id parameter){
+        NSLog(@"长按 linkAttstr = %@",linkAttstr);
+        NSLog(@"长按 parameter = %@",parameter);
+
+    };
+    self.textView.backgroundColor = [UIColor lightGrayColor];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
-- (void)CJUITextView:(CJUITextView *)textView layoutDisplaySize:(CGSize)displaySize {
-    self.textViewHeight.constant = displaySize.height;
+- (void)changeContent:(NSAttributedString *)text {
+    self.textAttStr = text;
 }
 
 @end

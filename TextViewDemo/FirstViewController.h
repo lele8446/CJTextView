@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "CJUITextView.h"
 
-@interface ViewController : UIViewController<CJUITextViewDelegate>
+@interface FirstViewController : UIViewController<CJUITextViewDelegate>
 @property (nonatomic, weak) IBOutlet CJUITextView *textView;
 @property (nonatomic, weak) IBOutlet UISwitch *switchButton;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *textViewHeight;

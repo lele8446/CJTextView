@@ -7,7 +7,8 @@
 //
 
 #import "RootViewController.h"
-#import "ViewController.h"
+#import "FirstViewController.h"
+#import "SecondViewController.h"
 
 @interface RootViewController ()
 
@@ -28,14 +29,14 @@
 - (IBAction)clickEdit:(id)sender {
     UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
     //由storyboard根据myView的storyBoardID来获取我们要切换的视图
-    ViewController *aViewCtr = [story instantiateViewControllerWithIdentifier:@"ViewControllerStr"];
+    FirstViewController *aViewCtr = [story instantiateViewControllerWithIdentifier:@"FirstViewController"];
     [self.navigationController pushViewController:aViewCtr animated:YES];
 }
 
 - (IBAction)clickDisplay:(id)sender {
     UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
     //由storyboard根据myView的storyBoardID来获取我们要切换的视图
-    ViewController *aViewCtr = [story instantiateViewControllerWithIdentifier:@"SecondViewController"];
+    SecondViewController *aViewCtr = [story instantiateViewControllerWithIdentifier:@"SecondViewController"];
     [self.navigationController pushViewController:aViewCtr animated:YES];
 }
 @end

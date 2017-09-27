@@ -6,12 +6,13 @@
 //  Copyright © 2016年 YiChe. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "FirstViewController.h"
+#import "SecondViewController.h"
 
-@interface ViewController ()
+@interface FirstViewController ()
 @end
 
-@implementation ViewController
+@implementation FirstViewController
 
 - (void)dealloc {
     [self.textView removeObserver];
@@ -51,6 +52,15 @@
         height = MIN(height, 120);
         self.textViewHeight.constant = height;
     }
+}
+
+- (IBAction)finish:(id)sender {
+    [self.view endEditing:YES];
+    UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
+    //由storyboard根据myView的storyBoardID来获取我们要切换的视图
+    SecondViewController *aViewCtr = [story instantiateViewControllerWithIdentifier:@"SecondViewController"];
+    [self.navigationController pushViewController:aViewCtr animated:YES];
+    [aViewCtr changeContent:self.textView.attributedText];
 }
 
 - (IBAction)insertTextclick:(id)sender {

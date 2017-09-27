@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="F32-ai-vib">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="F32-ai-vib">
     <device id="retina4_0" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
-        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -30,6 +30,10 @@
         <scene sceneID="HwE-OL-1NA">
             <objects>
                 <viewController id="g2d-ay-SxA" customClass="RootViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="qhs-9j-Gq2"/>
+                        <viewControllerLayoutGuide type="bottom" id="YCC-aS-ArP"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="n79-lA-g1y">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="504"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -43,7 +47,7 @@
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OpU-dV-jaW">
                                 <rect key="frame" x="129" y="155" width="62" height="30"/>
-                                <state key="normal" title="展示模式"/>
+                                <state key="normal" title="浏览模式"/>
                                 <connections>
                                     <action selector="clickDisplay:" destination="g2d-ay-SxA" eventType="touchUpInside" id="9tY-4T-sce"/>
                                 </connections>
@@ -51,12 +55,11 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="efd-s3-JOK" firstAttribute="top" secondItem="8iz-Ln-yQd" secondAttribute="top" constant="100" id="AKl-Vx-lZW"/>
-                            <constraint firstItem="efd-s3-JOK" firstAttribute="centerX" secondItem="8iz-Ln-yQd" secondAttribute="centerX" id="cIQ-Wo-ROn"/>
+                            <constraint firstItem="efd-s3-JOK" firstAttribute="top" secondItem="qhs-9j-Gq2" secondAttribute="bottom" constant="100" id="AKl-Vx-lZW"/>
+                            <constraint firstItem="efd-s3-JOK" firstAttribute="centerX" secondItem="n79-lA-g1y" secondAttribute="centerX" id="cIQ-Wo-ROn"/>
                             <constraint firstItem="OpU-dV-jaW" firstAttribute="top" secondItem="efd-s3-JOK" secondAttribute="bottom" constant="25" id="ggv-7P-iCa"/>
-                            <constraint firstItem="OpU-dV-jaW" firstAttribute="centerX" secondItem="8iz-Ln-yQd" secondAttribute="centerX" id="nqP-ci-qaz"/>
+                            <constraint firstItem="OpU-dV-jaW" firstAttribute="centerX" secondItem="n79-lA-g1y" secondAttribute="centerX" id="nqP-ci-qaz"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="8iz-Ln-yQd"/>
                     </view>
                     <navigationItem key="navigationItem" title="RootView" id="4Ll-c9-qqz"/>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
@@ -68,7 +71,11 @@
         <!--Edit-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController storyboardIdentifier="ViewControllerStr" id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="FirstViewController" id="BYZ-38-t0r" customClass="FirstViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="le8-Ye-fux"/>
+                        <viewControllerLayoutGuide type="bottom" id="NHG-4h-A2J"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="504"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -122,25 +129,39 @@
                                     <action selector="clickSwitch:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ujY-Nr-mxh"/>
                                 </connections>
                             </switch>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gan-EK-Srl">
+                                <rect key="frame" x="255" y="187" width="46" height="30"/>
+                                <color key="backgroundColor" red="1" green="0.92226089249999998" blue="0.77306253179999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="46" id="9Zn-Ap-eGH"/>
+                                    <constraint firstAttribute="height" constant="30" id="YRE-LS-mLo"/>
+                                </constraints>
+                                <state key="normal" title="完成"/>
+                                <connections>
+                                    <action selector="finish:" destination="BYZ-38-t0r" eventType="touchUpInside" id="QIc-os-kS8"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="OyT-Pb-dfb" firstAttribute="leading" secondItem="Vqj-tk-eRm" secondAttribute="trailing" constant="15" id="6gM-4l-BGD"/>
-                            <constraint firstItem="Hif-Uh-vR9" firstAttribute="leading" secondItem="gEl-fI-y61" secondAttribute="leading" constant="16" id="8KC-5Z-FBi"/>
+                            <constraint firstItem="Hif-Uh-vR9" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="8KC-5Z-FBi"/>
+                            <constraint firstItem="gan-EK-Srl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" symbolic="YES" id="A5n-hW-Thn"/>
                             <constraint firstItem="OyT-Pb-dfb" firstAttribute="width" secondItem="5Ad-f0-fAq" secondAttribute="width" id="JWm-qQ-zdZ"/>
                             <constraint firstItem="mw1-nH-dmf" firstAttribute="leading" secondItem="Hif-Uh-vR9" secondAttribute="trailing" constant="25" id="PFx-Eh-YWa"/>
-                            <constraint firstItem="gEl-fI-y61" firstAttribute="trailing" secondItem="5Ad-f0-fAq" secondAttribute="trailing" constant="5" id="PSM-ac-XcJ"/>
-                            <constraint firstItem="Hif-Uh-vR9" firstAttribute="leading" secondItem="gEl-fI-y61" secondAttribute="leading" constant="16" id="cFj-Yz-di0"/>
+                            <constraint firstAttribute="trailing" secondItem="5Ad-f0-fAq" secondAttribute="trailing" constant="5" id="PSM-ac-XcJ"/>
+                            <constraint firstItem="gan-EK-Srl" firstAttribute="centerY" secondItem="mw1-nH-dmf" secondAttribute="centerY" id="W5M-Z1-oT4"/>
+                            <constraint firstAttribute="trailing" secondItem="gan-EK-Srl" secondAttribute="trailing" constant="19" id="Yc8-Lp-4xe"/>
+                            <constraint firstItem="Hif-Uh-vR9" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="cFj-Yz-di0"/>
                             <constraint firstItem="OyT-Pb-dfb" firstAttribute="top" secondItem="5Ad-f0-fAq" secondAttribute="bottom" constant="4" id="fMx-M3-9Xr"/>
-                            <constraint firstItem="gEl-fI-y61" firstAttribute="trailing" secondItem="OyT-Pb-dfb" secondAttribute="trailing" constant="5" id="gWs-WK-gJn"/>
-                            <constraint firstItem="Vqj-tk-eRm" firstAttribute="top" secondItem="gEl-fI-y61" secondAttribute="top" constant="10" id="gY5-SB-2PB"/>
+                            <constraint firstAttribute="trailing" secondItem="OyT-Pb-dfb" secondAttribute="trailing" constant="5" id="gWs-WK-gJn"/>
+                            <constraint firstItem="Vqj-tk-eRm" firstAttribute="top" secondItem="le8-Ye-fux" secondAttribute="bottom" constant="10" id="gY5-SB-2PB"/>
                             <constraint firstItem="mw1-nH-dmf" firstAttribute="centerY" secondItem="Hif-Uh-vR9" secondAttribute="centerY" id="mQQ-yy-mVP"/>
-                            <constraint firstItem="Hif-Uh-vR9" firstAttribute="top" secondItem="gEl-fI-y61" secondAttribute="top" constant="192" id="oKe-BX-ivD"/>
-                            <constraint firstItem="Vqj-tk-eRm" firstAttribute="leading" secondItem="gEl-fI-y61" secondAttribute="leading" constant="13" id="ppX-sN-UpM"/>
-                            <constraint firstItem="5Ad-f0-fAq" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="gEl-fI-y61" secondAttribute="leading" symbolic="YES" id="tdi-gy-6tA"/>
-                            <constraint firstItem="5Ad-f0-fAq" firstAttribute="top" secondItem="gEl-fI-y61" secondAttribute="top" constant="8" id="vAu-hh-DQT"/>
+                            <constraint firstItem="Hif-Uh-vR9" firstAttribute="top" secondItem="le8-Ye-fux" secondAttribute="bottom" constant="192" id="oKe-BX-ivD"/>
+                            <constraint firstItem="Vqj-tk-eRm" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="13" id="ppX-sN-UpM"/>
+                            <constraint firstItem="5Ad-f0-fAq" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8bC-Xf-vdC" secondAttribute="leading" symbolic="YES" id="tdi-gy-6tA"/>
+                            <constraint firstItem="5Ad-f0-fAq" firstAttribute="top" secondItem="le8-Ye-fux" secondAttribute="bottom" constant="8" id="vAu-hh-DQT"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="gEl-fI-y61"/>
                     </view>
                     <navigationItem key="navigationItem" title="Edit" id="cYD-Vw-wJf"/>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
@@ -158,84 +179,30 @@
         <scene sceneID="Mly-Qw-Iv6">
             <objects>
                 <viewController storyboardIdentifier="SecondViewController" id="HiV-t7-XPF" customClass="SecondViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="5ZP-Qn-leX"/>
+                        <viewControllerLayoutGuide type="bottom" id="VrJ-by-Rx3"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="qYx-ad-kmT">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="504"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Mvr-aj-dnI" customClass="CJDisplayTextView">
-                                <rect key="frame" x="40" y="20" width="240" height="128"/>
-                                <color key="backgroundColor" red="1" green="0.92226089249999998" blue="0.77306253179999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <rect key="frame" x="40" y="100" width="240" height="128"/>
+                                <color key="backgroundColor" red="0.84705882349999995" green="0.86274509799999999" blue="0.87450980389999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="128" id="1tS-n6-fXK"/>
                                 </constraints>
-                                <attributedString key="attributedText">
-                                    <fragment content="Lorem ipsum dolor sit er elit lamet">
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".AppleSystemUIFont"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content=",">
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".PingFangSC-Regular"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content=" consectetaur cillium adipisicing pecu">
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".AppleSystemUIFont"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content=",">
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".PingFangSC-Regular"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content=" sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam">
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".AppleSystemUIFont"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content=",">
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".PingFangSC-Regular"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment>
-                                        <string key="content"> quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</string>
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".AppleSystemUIFont"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content=",">
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".PingFangSC-Regular"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment>
-                                        <string key="content"> sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
-                                        <attributes>
-                                            <font key="NSFont" size="15" name=".AppleSystemUIFont"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                </attributedString>
+                                <attributedString key="attributedText"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="Mvr-aj-dnI" firstAttribute="top" secondItem="Bmg-vz-2tU" secondAttribute="top" constant="20" id="ff6-so-YB6"/>
-                            <constraint firstItem="Mvr-aj-dnI" firstAttribute="leading" secondItem="Bmg-vz-2tU" secondAttribute="leading" constant="40" id="kQa-F3-VSR"/>
-                            <constraint firstItem="Bmg-vz-2tU" firstAttribute="trailing" secondItem="Mvr-aj-dnI" secondAttribute="trailing" constant="40" id="wfz-rG-iZJ"/>
+                            <constraint firstItem="Mvr-aj-dnI" firstAttribute="top" secondItem="5ZP-Qn-leX" secondAttribute="bottom" constant="100" id="ff6-so-YB6"/>
+                            <constraint firstItem="Mvr-aj-dnI" firstAttribute="leading" secondItem="qYx-ad-kmT" secondAttribute="leading" constant="40" id="kQa-F3-VSR"/>
+                            <constraint firstAttribute="trailing" secondItem="Mvr-aj-dnI" secondAttribute="trailing" constant="40" id="wfz-rG-iZJ"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="Bmg-vz-2tU"/>
                     </view>
                     <navigationItem key="navigationItem" title="Display" id="vPY-Rg-Ulp"/>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>

@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		B42A51BB1D1EC83400B29A5C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51BA1D1EC83400B29A5C /* main.m */; };
 		B42A51BE1D1EC83400B29A5C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51BD1D1EC83400B29A5C /* AppDelegate.m */; };
-		B42A51C11D1EC83400B29A5C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51C01D1EC83400B29A5C /* ViewController.m */; };
+		B42A51C11D1EC83400B29A5C /* FirstViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B42A51C01D1EC83400B29A5C /* FirstViewController.m */; };
 		B42A51C41D1EC83400B29A5C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B42A51C21D1EC83400B29A5C /* Main.storyboard */; };
 		B42A51C61D1EC83400B29A5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B42A51C51D1EC83400B29A5C /* Assets.xcassets */; };
 		B42A51C91D1EC83400B29A5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B42A51C71D1EC83400B29A5C /* LaunchScreen.storyboard */; };
@@ -43,8 +43,8 @@
 		B42A51BA1D1EC83400B29A5C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		B42A51BC1D1EC83400B29A5C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		B42A51BD1D1EC83400B29A5C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		B42A51BF1D1EC83400B29A5C /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		B42A51C01D1EC83400B29A5C /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		B42A51BF1D1EC83400B29A5C /* FirstViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FirstViewController.h; sourceTree = "<group>"; };
+		B42A51C01D1EC83400B29A5C /* FirstViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FirstViewController.m; sourceTree = "<group>"; };
 		B42A51C31D1EC83400B29A5C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B42A51C51D1EC83400B29A5C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B42A51C81D1EC83400B29A5C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -116,8 +116,8 @@
 				B4D79B761D5B248400166DB9 /* CJUITextView */,
 				B42A51BC1D1EC83400B29A5C /* AppDelegate.h */,
 				B42A51BD1D1EC83400B29A5C /* AppDelegate.m */,
-				B42A51BF1D1EC83400B29A5C /* ViewController.h */,
-				B42A51C01D1EC83400B29A5C /* ViewController.m */,
+				B42A51BF1D1EC83400B29A5C /* FirstViewController.h */,
+				B42A51C01D1EC83400B29A5C /* FirstViewController.m */,
 				B42C02AE1F7502C60063E09B /* SecondViewController.h */,
 				B42C02AD1F7502C60063E09B /* SecondViewController.m */,
 				B4910A1E1D7582DF00137CE2 /* RootViewController.h */,
@@ -301,7 +301,7 @@
 			files = (
 				B42C02AF1F7502C70063E09B /* SecondViewController.m in Sources */,
 				B4D79B791D5B248400166DB9 /* CJUITextView.m in Sources */,
-				B42A51C11D1EC83400B29A5C /* ViewController.m in Sources */,
+				B42A51C11D1EC83400B29A5C /* FirstViewController.m in Sources */,
 				B42A51BE1D1EC83400B29A5C /* AppDelegate.m in Sources */,
 				B42A51BB1D1EC83400B29A5C /* main.m in Sources */,
 				B4910A201D7582DF00137CE2 /* RootViewController.m in Sources */,
@@ -456,7 +456,7 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = TextViewDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = CJ.HDJY.tes;
@@ -477,7 +477,7 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = TextViewDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = CJ.HDJY.tes;

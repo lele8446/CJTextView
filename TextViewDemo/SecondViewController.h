@@ -7,7 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CJDisplayTextView.h"
 
 @interface SecondViewController : UIViewController
+@property (nonatomic, weak) IBOutlet CJDisplayTextView *textView;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *textViewHeight;
+
+- (void)changeContent:(NSAttributedString *)text;
 
 @end
