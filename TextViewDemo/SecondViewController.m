@@ -9,7 +9,7 @@
 #import "SecondViewController.h"
 
 @interface SecondViewController ()
-@property (nonatomic, strong) NSAttributedString *textAttStr;
+
 @end
 
 @implementation SecondViewController
@@ -17,8 +17,17 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if (self.textAttStr.length > 0) {
-        self.textView.attributedText = self.textAttStr;
+    if (self.textModelArray.count > 0) {
+        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]init];
+        for (CJTextViewModel *model in self.textModelArray) {
+            if (model.isLink) {
+                NSAttributedString *linkStr = [CJDisplayTextView linkAttStr:model.attrString attributes:nil parameter:model.parameter];
+                [attStr appendAttributedString:linkStr];
+            }else{
+                [attStr appendAttributedString:model.attrString];
+            }
+        }
+        self.textView.attributedText = attStr;
     }
     else{
         NSString *str = @"CJDisplayTextView是继承自UITextView的自定义控件，它只支持浏览模式，不允许编辑。它可以根据显示内容动态调整高度，并自动识别网址、日期、地址、电话，点击则触发系统默认行为；同时允许插入自定义点击链点，自定义链点请通过类方法`+linkStr:attributes:parameter:`生成，点击自定义链点会触发点击回调block和长按回调（长按只支持iOS10之后的系统）。相关链接https://github.com/lele8446/TextViewDemo 更多……";
@@ -37,7 +46,8 @@
         //
         //    NSDictionary *afterLinkDic = @{NSForegroundColorAttributeName:[UIColor redColor]};
         
-        NSAttributedString *linkStr = [CJDisplayTextView linkStr:@"@用户" attributes:linkDic parameter:@"用户id"];
+        NSAttributedString *userStr = [[NSAttributedString alloc]initWithString:@"@用户"];
+        NSAttributedString *linkStr = [CJDisplayTextView linkAttStr:userStr attributes:linkDic parameter:@"用户id"];
         
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithString:str attributes:attDic];
         [attStr insertAttributedString:linkStr atIndex:111];
@@ -49,13 +59,13 @@
     self.textView.displayViewLayoutBlock = ^(CGSize size){
         wSelf.textViewHeight.constant = size.height;
     };
-    self.textView.clickBlock = ^(NSAttributedString *linkAttstr, id parameter){
-        NSLog(@"点击 linkAttstr = %@",linkAttstr);
-        NSLog(@"点击 parameter = %@",parameter);
+    self.textView.clickBlock = ^(CJTextViewModel *textModel){
+        NSLog(@"点击 linkAttstr = %@",textModel.attrString);
+        NSLog(@"点击 parameter = %@",textModel.parameter);
     };
-    self.textView.pressBlock = ^(NSAttributedString *linkAttstr, id parameter){
-        NSLog(@"长按 linkAttstr = %@",linkAttstr);
-        NSLog(@"长按 parameter = %@",parameter);
+    self.textView.pressBlock = ^(CJTextViewModel *textModel){
+        NSLog(@"长按 linkAttstr = %@",textModel.attrString);
+        NSLog(@"长按 parameter = %@",textModel.parameter);
 
     };
     self.textView.backgroundColor = [UIColor lightGrayColor];
@@ -63,10 +73,6 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-}
-
-- (void)changeContent:(NSAttributedString *)text {
-    self.textAttStr = text;
 }
 
 @end

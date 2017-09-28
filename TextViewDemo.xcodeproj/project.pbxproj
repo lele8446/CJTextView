@@ -19,6 +19,7 @@
 		B42C02B21F7517B20063E09B /* CJDisplayTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B42C02B11F7517B20063E09B /* CJDisplayTextView.m */; };
 		B4910A201D7582DF00137CE2 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B4910A1F1D7582DF00137CE2 /* RootViewController.m */; };
 		B4D79B791D5B248400166DB9 /* CJUITextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D79B781D5B248400166DB9 /* CJUITextView.m */; };
+		B4FB47891F7C8D590094C148 /* CJTextViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = B4FB47881F7C8D590094C148 /* CJTextViewModel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +64,8 @@
 		B4910A1F1D7582DF00137CE2 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
 		B4D79B771D5B248400166DB9 /* CJUITextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJUITextView.h; sourceTree = "<group>"; };
 		B4D79B781D5B248400166DB9 /* CJUITextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJUITextView.m; sourceTree = "<group>"; };
+		B4FB47871F7C8D590094C148 /* CJTextViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CJTextViewModel.h; sourceTree = "<group>"; };
+		B4FB47881F7C8D590094C148 /* CJTextViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CJTextViewModel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +167,8 @@
 				B4D79B781D5B248400166DB9 /* CJUITextView.m */,
 				B42C02B01F7517B20063E09B /* CJDisplayTextView.h */,
 				B42C02B11F7517B20063E09B /* CJDisplayTextView.m */,
+				B4FB47871F7C8D590094C148 /* CJTextViewModel.h */,
+				B4FB47881F7C8D590094C148 /* CJTextViewModel.m */,
 			);
 			path = CJUITextView;
 			sourceTree = SOURCE_ROOT;
@@ -301,6 +306,7 @@
 			files = (
 				B42C02AF1F7502C70063E09B /* SecondViewController.m in Sources */,
 				B4D79B791D5B248400166DB9 /* CJUITextView.m in Sources */,
+				B4FB47891F7C8D590094C148 /* CJTextViewModel.m in Sources */,
 				B42A51C11D1EC83400B29A5C /* FirstViewController.m in Sources */,
 				B42A51BE1D1EC83400B29A5C /* AppDelegate.m in Sources */,
 				B42A51BB1D1EC83400B29A5C /* main.m in Sources */,

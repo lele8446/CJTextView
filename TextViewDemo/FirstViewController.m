@@ -56,18 +56,26 @@
 
 - (IBAction)finish:(id)sender {
     [self.view endEditing:YES];
+    
+    NSArray *allModel = [self.textView allTextModel];
+    for (CJTextViewModel *model in allModel) {
+        if (model.isInsertText) {
+            model.isLink = YES;
+        }
+    }
+    
     UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
     //由storyboard根据myView的storyBoardID来获取我们要切换的视图
     SecondViewController *aViewCtr = [story instantiateViewControllerWithIdentifier:@"SecondViewController"];
+    aViewCtr.textModelArray = allModel;
     [self.navigationController pushViewController:aViewCtr animated:YES];
-    [aViewCtr changeContent:self.textView.attributedText];
 }
 
 - (IBAction)insertTextclick:(id)sender {
     [self.textView becomeFirstResponder];
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#主题#"];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
-    CJTextViewModel *model = [CJTextViewModel textViewModelKey:@"主题" attrString:str parameter:@{@"key":@"插入主题"}];
+    CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"主题" attrString:str parameter:@{@"key":@"插入主题"}];
     [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
 }
 
@@ -76,13 +84,13 @@
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"@人名"];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
     [str addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0, str.length)];
-    CJTextViewModel *model = [CJTextViewModel textViewModelKey:@"人名" attrString:str parameter:@"参数"];
+    CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"人名" attrString:str parameter:@"参数"];
     [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
     [self.textView resignFirstResponder];
-    NSArray *userModel = [self.textView insertTextModelWithKey:@"人名"];
+    NSArray *userModel = [self.textView insertTextModelWithIdentifier:@"人名"];
     NSArray *allInsertModel = [self.textView allInsertTextModel];
     NSArray *allModel = [self.textView allTextModel];
     NSLog(@"@人名 = %@",userModel);

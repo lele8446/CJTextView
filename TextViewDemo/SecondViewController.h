@@ -13,6 +13,6 @@
 @property (nonatomic, weak) IBOutlet CJDisplayTextView *textView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *textViewHeight;
 
-- (void)changeContent:(NSAttributedString *)text;
+@property (nonatomic, strong) NSArray <CJTextViewModel *>*textModelArray;
 
 @end

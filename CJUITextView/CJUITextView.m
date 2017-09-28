@@ -11,6 +11,7 @@
 #define CJTextViewIsNull(a) ((a)==nil || (a)==NULL || (NSNull *)(a)==[NSNull null])
 
 NSString * const SPECIAL_TEXT_NUM = @"SPECIAL_TEXT_NUM";
+
 //标记插入文本的索引值
 NSString * const kCJInsterSpecialTextKeyAttributeName         = @"kCJInsterSpecialTextKeyAttributeName";
 //标记相同的插入文本
@@ -41,7 +42,7 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
 @end
 
 @implementation CJUITextView
-@dynamic delegate ;
+@dynamic delegate;
 
 - (UILabel *)placeHoldLabel {
     if (!_placeHoldLabel) {
@@ -332,7 +333,7 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
     NSRange selectedRange = self.selectedRange;
     
     NSMutableAttributedString *insertTextAttStr = [self instertAttributedString:textModel.attrString];
-    NSString *insertKeyGroup = (textModel.specialKey && textModel.specialKey.length > 0)?textModel.specialKey:kCJInsterDefaultGroupAttributeName;
+    NSString *insertKeyGroup = (textModel.insertIdentifier && textModel.insertIdentifier.length > 0)?textModel.insertIdentifier:kCJInsterDefaultGroupAttributeName;
     [insertTextAttStr addAttribute:kCJInsterSpecialTextKeyGroupAttributeName value:insertKeyGroup range:NSMakeRange(0, insertTextAttStr.length)];
     //插入key
     NSString *insertKey = [NSUUID UUID].UUIDString;
@@ -356,8 +357,8 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
     return newSelsctRange;
 }
 
-- (NSArray <CJTextViewModel *>*)insertTextModelWithKey:(NSString *)specialStrKey {
-    __block NSArray *array = nil;
+- (NSArray <CJTextViewModel *>*)insertTextModelWithIdentifier:(NSString *)identifier {
+    __block NSArray *array = @[];
     //遍历相同的KeyGroup
     [self.attributedText enumerateAttribute:kCJInsterSpecialTextKeyGroupAttributeName inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
         
@@ -369,8 +370,8 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
         }
         if (dicAtt.count > 0) {
             NSString *keyGroup = dicAtt[kCJInsterSpecialTextKeyGroupAttributeName];
-            if (keyGroup.length > 0 && specialStrKey.length > 0) {
-                if ([keyGroup isEqualToString:specialStrKey]) {
+            if (keyGroup.length > 0 && identifier.length > 0) {
+                if ([keyGroup isEqualToString:identifier]) {
                     array = [self textModelFromAttributedString:rangeText insert:YES rangeTextRange:rangeTextRange];
                 }
             }
@@ -417,8 +418,9 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
             if (rangeStr.length > 0) {
                 modelRange = NSRangeFromString(rangeStr);
             }
-            CJTextViewModel *model = [CJTextViewModel textViewModelKey:specialStrKey attrString:sText parameter:parameter];
+            CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:specialStrKey attrString:sText parameter:parameter];
             model.range = modelRange;
+            model.isInsertText = ![key isEqualToString:kCJTextAttributeName];
             
             [array insertObject:model atIndex:0];
         }
@@ -548,7 +550,6 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
     return YES;
 }
 - (BOOL)textViewShouldEndEditing:(UITextView *)textView {
-    [self handleEditTextModel];
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewShouldEndEditing:)]) {
         return [self.myDelegate CJUITextViewShouldEndEditing:self];
     }
@@ -561,6 +562,7 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
     }
 }
 - (void)textViewDidEndEditing:(UITextView *)textView {
+    [self handleEditTextModel];
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidEndEditing:)]) {
         [self.myDelegate CJUITextViewDidEndEditing:self];
     }
@@ -664,25 +666,3 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 }
 @end
 
-@implementation CJTextViewModel
-
-+ (CJTextViewModel *)textViewModelKey:(NSString *)specialKey
-                           attrString:(NSAttributedString *)attrString
-                            parameter:(id)parameter
-{
-    CJTextViewModel *model = [[CJTextViewModel alloc]init];
-    model.specialKey = specialKey;
-    model.attrString = attrString;
-    model.parameter = parameter;
-    return model;
-}
-
-- (id)copyWithZone:(NSZone *)zone {
-    CJTextViewModel *model = [[CJTextViewModel alloc]init];
-    model.range = self.range;
-    model.specialKey = self.specialKey;
-    model.attrString = self.attrString;
-    model.parameter = self.parameter;
-    return model;
-}
-@end

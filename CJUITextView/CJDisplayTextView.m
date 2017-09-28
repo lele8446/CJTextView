@@ -2,8 +2,8 @@
 //  CJDisplayTextView.m
 //  TextViewDemo
 //
-//  Created by ChiJinLian on 2017/9/22.
-//  Copyright © 2017年 YiChe. All rights reserved.
+//  Created by C.K.Lian on 16/6/26.
+//  Copyright © 2016年 C.K.Lian.. All rights reserved.
 //
 
 #import "CJDisplayTextView.h"
@@ -19,30 +19,25 @@ typedef enum : NSUInteger {
     OtherLink
 } CJTextViewLinkType;
 
-@interface CJTextNSURL: NSURL
-@property (nonatomic, assign) CJTextViewLinkType linkType;
-@property (nonatomic, strong) id parameter;
-@property (nonatomic, strong) NSDictionary <NSAttributedStringKey, id>* afterClickAttributes;
+@interface CJLinkNSURL : NSURL
+@property (nonatomic, strong) CJTextViewModel *textModel;
+@end
+@implementation CJLinkNSURL
 @end
 
-@implementation CJTextNSURL
-
+@interface CJLinkTextAttachment : NSTextAttachment
+@property (nonatomic, strong) CJTextViewModel *textModel;
 @end
-
+@implementation CJLinkTextAttachment
+@end
 
 @interface CJDisplayTextView ()<UITextViewDelegate>
-{
-    
-}
 @end
 
 @implementation CJDisplayTextView
 
 @dynamic editable;
-
-- (void)dealloc {
-    self.delegate = nil;
-}
+@dynamic delegate;
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
@@ -65,7 +60,7 @@ typedef enum : NSUInteger {
     self.dataDetectorTypes = UIDataDetectorTypeAll;
     self.contentInset = UIEdgeInsetsMake(-100, 0, 0, 0);
     self.textContainerInset = UIEdgeInsetsMake(0, -5, 0, -5);
-    self.delegate = self;
+    [self setValue:self forKey:@"delegate"];
 }
 
 - (void)layoutSubviews {
@@ -94,20 +89,20 @@ typedef enum : NSUInteger {
     return NO;
 }
 
-+ (NSAttributedString *)linkStr:(NSString *)str attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs parameter:(id)parameter {
-    return [self linkStr:str attributes:attrs afterClickAttributes:nil parameter:parameter];
++ (NSAttributedString *)linkAttStr:(NSAttributedString *)attStr attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs parameter:(id)parameter {
+    return [self linkAttStr:attStr attributes:attrs afterClickAttributes:nil parameter:parameter];
 }
 
-+ (NSAttributedString *)linkStr:(NSString *)str
++ (NSAttributedString *)linkAttStr:(NSAttributedString *)attStr
                         attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs
               afterClickAttributes:(NSDictionary<NSAttributedStringKey, id> *)afterClickAttributes
                          parameter:(id)parameter
 {
-    if (str.length == 0) {
+    if (attStr.length == 0) {
         return [[NSAttributedString alloc]init];
     }
-    NSRange range = NSMakeRange(0, str.length);
-    NSMutableAttributedString *linkStr = [[NSMutableAttributedString alloc]initWithString:str];
+    NSRange range = NSMakeRange(0, attStr.length);
+    NSMutableAttributedString *linkStr = [[NSMutableAttributedString alloc]initWithAttributedString:attStr];
     if (attrs) {
         NSMutableDictionary *dicAtt = [NSMutableDictionary dictionaryWithCapacity:3];
         [dicAtt addEntriesFromDictionary:[linkStr attributesAtIndex:0 effectiveRange:&range]];
@@ -115,11 +110,25 @@ typedef enum : NSUInteger {
         [linkStr addAttributes:dicAtt range:range];
     }
     
-    CJTextNSURL *linkUrl = [CJTextNSURL URLWithString:@"https://github.com/lele8446/TextViewDemo"];
-    linkUrl.parameter = parameter;
-    linkUrl.afterClickAttributes = afterClickAttributes;
-    [linkStr addAttribute:NSLinkAttributeName value:linkUrl range:NSMakeRange(0, linkStr.length)];
-    return linkStr;
+    CJTextViewModel *linkModel = [[CJTextViewModel alloc]init];
+    linkModel.parameter = parameter;
+    linkModel.afterClickAttributes = afterClickAttributes;
+    
+#warning 不知为毛，这里设置 NSAttachmentAttributeName 无效了，改为通过 NSLinkAttributeName 设置
+//    CJLinkTextAttachment *textAttachment = [[CJLinkTextAttachment alloc]init];
+//    textAttachment.textModel = linkModel;
+//    [linkStr addAttribute:NSAttachmentAttributeName value:textAttachment range:NSMakeRange(0, linkStr.length)];
+    
+    CJLinkNSURL *url = [CJLinkNSURL URLWithString:@"https://github.com/lele8446/TextViewDemo"];
+    url.textModel = linkModel;
+    [linkStr addAttribute:NSLinkAttributeName value:url range:NSMakeRange(0, linkStr.length)];
+    
+    NSMutableAttributedString *resultStr = [[NSMutableAttributedString alloc]initWithString:@" "];
+    [resultStr appendAttributedString:linkStr];
+    
+    linkModel.attrString = resultStr;
+    
+    return resultStr;
 }
 
 - (CGSize)caculateTextViewSize:(CGSize)textSize {
@@ -134,70 +143,96 @@ typedef enum : NSUInteger {
     }
 }
 
-- (void)textViewDidChangeSelection:(UITextView *)textView {
-    
-}
-
 - (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction {
-    if ([URL isKindOfClass:[CJTextNSURL class]]) {
-        CJTextNSURL *linkUrl = (CJTextNSURL *)URL;
-        
-        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithAttributedString:textView.attributedText];
-        
-        if (linkUrl.afterClickAttributes) {
-            NSMutableDictionary *dicAtt = [NSMutableDictionary dictionaryWithCapacity:3];
-            [dicAtt addEntriesFromDictionary:[attStr attributesAtIndex:characterRange.location effectiveRange:&characterRange]];
-            [dicAtt addEntriesFromDictionary:linkUrl.afterClickAttributes];
-            [attStr addAttributes:dicAtt range:characterRange];
-            textView.attributedText = attStr;
-        }
-        
-        NSAttributedString *linkAttstr = [attStr attributedSubstringFromRange:characterRange];
-        id parameter = linkUrl.parameter;
-        if (interaction == UITextItemInteractionInvokeDefaultAction) {
-            if (self.clickBlock) {
-                self.clickBlock(linkAttstr, parameter);
-            }
-        }else if (interaction == UITextItemInteractionPresentActions) {
-            if (self.pressBlock) {
-                self.pressBlock(linkAttstr, parameter);
-            }
-        }
-        return NO;
-    }
-    return YES;
+    return [self textView:textView shouldInteraction:URL inRange:characterRange haveInteraction:YES interaction:interaction];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction {
-    return NO;
+    return [self textView:textView shouldInteraction:textAttachment inRange:characterRange haveInteraction:YES interaction:interaction];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange {
-    if ([URL isKindOfClass:[CJTextNSURL class]]) {
-        CJTextNSURL *linkUrl = (CJTextNSURL *)URL;
-        
-        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithAttributedString:textView.attributedText];
-        
-        if (linkUrl.afterClickAttributes) {
-            NSMutableDictionary *dicAtt = [NSMutableDictionary dictionaryWithCapacity:3];
-            [dicAtt addEntriesFromDictionary:[attStr attributesAtIndex:characterRange.location effectiveRange:&characterRange]];
-            [dicAtt addEntriesFromDictionary:linkUrl.afterClickAttributes];
-            [attStr addAttributes:dicAtt range:characterRange];
-            textView.attributedText = attStr;
-        }
-        
-        NSAttributedString *linkAttstr = [attStr attributedSubstringFromRange:characterRange];
-        id parameter = linkUrl.parameter;
-        if (self.clickBlock) {
-            self.clickBlock(linkAttstr, parameter);
-        }
-        return NO;
-    }
-    return YES;
+    return [self textView:textView shouldInteraction:URL inRange:characterRange haveInteraction:NO interaction:UITextItemInteractionInvokeDefaultAction];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange {
-    return NO;
+    return [self textView:textView shouldInteraction:textAttachment inRange:characterRange haveInteraction:NO interaction:UITextItemInteractionInvokeDefaultAction];
 }
 
+- (BOOL)textView:(UITextView *)textView shouldInteraction:(id)link inRange:(NSRange)characterRange haveInteraction:(BOOL)haveInteraction interaction:(UITextItemInteraction)interaction
+{
+    if ([link isKindOfClass:[NSURL class]]) {
+        if ([link isKindOfClass:[CJLinkNSURL class]]) {
+            CJLinkNSURL *linkUrl = (CJLinkNSURL *)link;
+            CJTextViewModel *linkModel = linkUrl.textModel;
+            
+            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithAttributedString:textView.attributedText];
+            
+            if (linkModel.afterClickAttributes) {
+                NSMutableDictionary *dicAtt = [NSMutableDictionary dictionaryWithCapacity:3];
+                [dicAtt addEntriesFromDictionary:[attStr attributesAtIndex:characterRange.location effectiveRange:&characterRange]];
+                [dicAtt addEntriesFromDictionary:linkModel.afterClickAttributes];
+                [attStr addAttributes:dicAtt range:characterRange];
+                textView.attributedText = attStr;
+            }
+            [self linkModel:linkModel haveInteraction:haveInteraction interaction:interaction];
+            return NO;
+        }
+        else{
+            if (self.shouldInteractUrlBlock) {
+                NSURL *linkUrl = (NSURL *)link;
+                return self.shouldInteractUrlBlock(linkUrl, characterRange,interaction);
+            }else{
+                return YES;
+            }
+        }
+    }
+    
+    if ([link isKindOfClass:[NSTextAttachment class]]) {
+        if ([link isKindOfClass:[CJLinkTextAttachment class]]) {
+            CJLinkTextAttachment *linkTextAttachment = (CJLinkTextAttachment *)link;
+            CJTextViewModel *linkModel = linkTextAttachment.textModel;
+            
+            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithAttributedString:textView.attributedText];
+            
+            if (linkModel.afterClickAttributes) {
+                NSMutableDictionary *dicAtt = [NSMutableDictionary dictionaryWithCapacity:3];
+                [dicAtt addEntriesFromDictionary:[attStr attributesAtIndex:characterRange.location effectiveRange:&characterRange]];
+                [dicAtt addEntriesFromDictionary:linkModel.afterClickAttributes];
+                [attStr addAttributes:dicAtt range:characterRange];
+                textView.attributedText = attStr;
+            }
+            [self linkModel:linkModel haveInteraction:haveInteraction interaction:interaction];
+            return NO;
+        }
+        else{
+            if (self.shouldInteractAttachmentBlock) {
+                NSTextAttachment *textAttachment = (NSTextAttachment *)link;
+                return self.shouldInteractAttachmentBlock(textAttachment, characterRange,interaction);
+            }else{
+                return YES;
+            }
+        }
+    }
+    
+    return YES;
+}
+
+- (void)linkModel:(CJTextViewModel *)linkModel haveInteraction:(BOOL)haveInteraction interaction:(UITextItemInteraction)interaction {
+    if (haveInteraction) {
+        if (interaction == UITextItemInteractionInvokeDefaultAction) {
+            if (self.clickBlock) {
+                self.clickBlock(linkModel);
+            }
+        }else if (interaction == UITextItemInteractionPresentActions) {
+            if (self.pressBlock) {
+                self.pressBlock(linkModel);
+            }
+        }
+    }else{
+        if (self.clickBlock) {
+            self.clickBlock(linkModel);
+        }
+    }
+}
 @end

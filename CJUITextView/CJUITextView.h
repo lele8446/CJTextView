@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CJTextViewModel.h"
 
 @class CJUITextView;
-@class CJTextViewModel;
 
 @protocol CJUITextViewDelegate <NSObject>
 
@@ -66,8 +66,9 @@
 
 /**
  记录插入文本的索引
+ 注意！！2.0.0版本之前其对应的存储对象为NSUInteger类型，2.0.0后为NSString类型
  */
-extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！！对应2.0.0版本之前的SPECIAL_TEXT_NUM宏，请使用-specialTextModelWithKey:相关方法获取插入文本")));
+extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！！对应2.0.0版本之前的SPECIAL_TEXT_NUM宏，请使用-insertTextModelWithIdentifier:相关方法获取插入文本")));
 
 @interface CJUITextView : UITextView
 /**
@@ -139,7 +140,7 @@ extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！
  @param specialStrKey 插入文本key
  @return              CJTextViewModel数组
  */
-- (NSArray <CJTextViewModel *>*)insertTextModelWithKey:(NSString *)specialStrKey;
+- (NSArray <CJTextViewModel *>*)insertTextModelWithIdentifier:(NSString *)identifier;
 
 /**
  获取所有插入数组
@@ -170,31 +171,5 @@ extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！
 - (void)removeObserver;
 
 @end
-
-/**
- 编辑的文本对象model
- */
-@interface CJTextViewModel : NSObject
-/**
- 标识插入文本的key
- */
-@property (nonatomic, copy) NSString *specialKey;
-/**
- 文本range
- */
-@property (nonatomic, assign) NSRange range;
-/**
- 编辑文本的NSAttributedString
- */
-@property (nonatomic, strong) NSAttributedString *attrString;
-/**
- 文本自定义参数（针对插入内容，比如插入： @姓名，携带参数userID）
- */
-@property (nonatomic, strong) id parameter;
-
-+ (CJTextViewModel *)textViewModelKey:(NSString *)specialKey
-                           attrString:(NSAttributedString *)attrString
-                            parameter:(id)parameter;
-@end;
 
 
