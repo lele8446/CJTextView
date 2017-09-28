@@ -123,6 +123,7 @@ typedef enum : NSUInteger {
     url.textModel = linkModel;
     [linkStr addAttribute:NSLinkAttributeName value:url range:NSMakeRange(0, linkStr.length)];
     
+    //链点前面加空格，避免NSLinkAttributeName 连续出现时，系统将其识别为同一个链点
     NSMutableAttributedString *resultStr = [[NSMutableAttributedString alloc]initWithString:@" "];
     [resultStr appendAttributedString:linkStr];
     
