@@ -75,7 +75,8 @@
     [self.textView becomeFirstResponder];
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#主题#"];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
-    CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"主题" attrString:str parameter:@{@"key":@"插入主题"}];
+    NSString *parameter = [NSString stringWithFormat:@"#主题%@#",@(rand())];
+    CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"主题" attrString:str parameter:parameter];
     [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
 }
 
@@ -84,7 +85,8 @@
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"@人名"];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
     [str addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0, str.length)];
-    CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"人名" attrString:str parameter:@"参数"];
+    NSString *parameter = [NSString stringWithFormat:@"@人名%@",@(rand())];
+    CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"人名" attrString:str parameter:parameter];
     [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
 }
 

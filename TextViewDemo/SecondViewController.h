@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "CJDisplayTextView.h"
 
+#define ScreenWidth [[UIScreen mainScreen] bounds].size.width
+
 @interface SecondViewController : UIViewController
 @property (nonatomic, weak) IBOutlet CJDisplayTextView *textView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *textViewHeight;

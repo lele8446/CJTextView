@@ -9,6 +9,30 @@
 #import <UIKit/UIKit.h>
 #import "CJTextViewModel.h"
 
+/**
+ 记录插入文本的索引
+ 注意！！2.0.0版本之前其对应的存储对象为NSUInteger类型，2.0.0后为NSString类型
+ */
+extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！！对应2.0.0版本之前的SPECIAL_TEXT_NUM宏，请使用-insertTextModelWithIdentifier:相关方法获取插入文本")));
+
+/**
+ 标记这是正常编辑的文本，不是插入的特殊文本。存储的值类型为NSString
+ */
+extern NSString * const kCJTextAttributeName;
+/**
+ 标记这是链点文本，存储的值类型为BOOl
+ */
+extern NSString * const kCJLinkAttributeName;
+/**
+ 标记插入文本的自定义参数，存储的值类型为id
+ */
+extern NSString * const kCJInsterSpecialTextParameterAttributeName;
+/**
+ 标记这是插入特殊文本，存储的值类型为NSString
+ */
+extern NSString * const kCJInsterSpecialTextKeyGroupAttributeName;
+
+
 @class CJUITextView;
 
 @protocol CJUITextViewDelegate <NSObject>
@@ -64,12 +88,14 @@
 - (BOOL)CJUITextView:(CJUITextView *)textView shouldInteractWithTextAttachment:(NSTextAttachment *)textAttachment inRange:(NSRange)characterRange NS_DEPRECATED_IOS(7_0, 10_0, "Use textView:shouldInteractWithURL:inRange:forInteractionType: instead");
 @end
 
-/**
- 记录插入文本的索引
- 注意！！2.0.0版本之前其对应的存储对象为NSUInteger类型，2.0.0后为NSString类型
- */
-extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！！对应2.0.0版本之前的SPECIAL_TEXT_NUM宏，请使用-insertTextModelWithIdentifier:相关方法获取插入文本")));
 
+/**
+ CJUITextView功能概要：
+ 1、可设置placeHold默认提示语；
+ 2、autoLayoutHeight设置，开启后TextView高度可根据输入内容动态调整
+ 3、支持插入特殊文本，比如 @人名 、#主题#，同时设置插入文本是否可编辑，插入文本可携带自定义参数
+ 4、TextView输入内容，可通过 `-allTextModel` 等相关方法建模输出
+ */
 @interface CJUITextView : UITextView
 /**
  注意!!!这里要实现的是myDelegate，而不是delegate代理
@@ -127,7 +153,7 @@ extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！
 
 /**
  在指定位置插入文本
-
+ 
  @param textModel 插入文本对象
  @param loc       插入位置
  @return          插入文本后的光标位置
@@ -153,9 +179,9 @@ extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！
  获取所有文本model数组，包括输入的文本内容，顺序排列
  比如：textView.attributedText = @"测试内容1 @人名 #主题# 测试内容2"
  结果为：@[ 测试内容1,
-          @人名,
-          #主题#,
-          测试内容2 ]
+ @人名,
+ #主题#,
+ 测试内容2 ]
  
  @return  CJTextViewModel数组
  */
@@ -169,6 +195,18 @@ extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！
  * 注意!!!  iOS9以下系统必须调用，不然会crash !!!
  */
 - (void)removeObserver;
+
+/**
+ 设置指定range的内容为特殊文本
+
+ @param range 指定range
+ @param attrs 设置属性
+ @param attributedText 设置的源NSAttributedString
+ @return 设置后的NSAttributedString
+ */
++ (NSMutableAttributedString *)setRangeStrAsSpecialText:(NSRange)range
+                                             attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs
+                                         attributedText:(NSMutableAttributedString *)attributedText;
 
 @end
 

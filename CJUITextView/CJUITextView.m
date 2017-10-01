@@ -24,6 +24,7 @@ NSString * const kCJInsterSpecialTextParameterAttributeName   = @"kCJInsterSpeci
 NSString * const kCJTextAttributeName                         = @"kCJTextAttributeName";
 //标记未设置标志符的插入文本
 NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefaultGroupAttributeName";
+NSString * const kCJLinkAttributeName                         = @"kCJLinkAttributeName";
 
 @interface CJUITextView()<UITextViewDelegate>
 {
@@ -91,16 +92,23 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
 
 - (void)setFont:(UIFont *)font {
     [super setFont:font];
+    NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithCapacity:3];
+    [dic addEntriesFromDictionary:self.defaultAttributes];
+    [dic setValue:font forKey:NSFontAttributeName];
+    self.defaultAttributes = dic;
     [self setPlaceHoldTextFont:font];
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
-    self.typingAttributes = self.defaultAttributes;
     [super setAttributedText:attributedText];
+    self.typingAttributes = self.defaultAttributes;
 }
 
 - (UIColor *)getSpecialTextColor {
     if (!_specialTextColor || nil == _specialTextColor) {
+        if (!self.textColor || self.textColor == nil) {
+            self.textColor = [UIColor blackColor];
+        }
         _specialTextColor = self.textColor;
     }
     return _specialTextColor;
@@ -328,7 +336,7 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
         }
     }
 
-    NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:[self handleEditTextModel]];
+    NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:[CJUITextView handleEditTextModel:self.attributedText]];
     
     NSRange selectedRange = self.selectedRange;
     
@@ -358,6 +366,7 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
 }
 
 - (NSArray <CJTextViewModel *>*)insertTextModelWithIdentifier:(NSString *)identifier {
+    [self handleEditAttributedTextToCJTextModel];
     __block NSArray *array = @[];
     //遍历相同的KeyGroup
     [self.attributedText enumerateAttribute:kCJInsterSpecialTextKeyGroupAttributeName inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
@@ -381,11 +390,13 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
 }
 
 - (NSArray <CJTextViewModel *>*)allInsertTextModel {
+    [self handleEditAttributedTextToCJTextModel];
     NSArray *array = [self textModelFromAttributedString:self.attributedText insert:YES rangeTextRange:NSMakeRange(0, self.attributedText.length)];
     return array;
 }
 
 - (NSArray <CJTextViewModel *>*)allTextModel {
+    [self handleEditAttributedTextToCJTextModel];
     NSArray *array = [self textModelFromAttributedString:self.attributedText insert:NO rangeTextRange:NSMakeRange(0, self.attributedText.length)];
     return array;
 }
@@ -421,6 +432,11 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
             CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:specialStrKey attrString:sText parameter:parameter];
             model.range = modelRange;
             model.isInsertText = ![key isEqualToString:kCJTextAttributeName];
+            if ([modelAttrs[kCJLinkAttributeName] boolValue]) {
+                model.isLink = YES;
+            }else{
+                model.isLink = NO;
+            }
             
             [array insertObject:model atIndex:0];
         }
@@ -428,8 +444,12 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
     return array;
 }
 
-- (NSAttributedString *)handleEditTextModel {
-    NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
+- (void)handleEditAttributedTextToCJTextModel {
+    self.attributedText = [CJUITextView handleEditTextModel:self.attributedText];
+}
+
++ (NSMutableAttributedString *)handleEditTextModel:(NSAttributedString *)attributedText {
+    NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:attributedText];
     [textAttStr.string enumerateSubstringsInRange:NSMakeRange(0, [textAttStr.string length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:
      ^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
          NSDictionary *dicAtt = [textAttStr attributesAtIndex:substringRange.location effectiveRange:&substringRange];
@@ -437,7 +457,6 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
              [textAttStr addAttribute:kCJInsterSpecialTextKeyAttributeName value:kCJTextAttributeName range:substringRange];
          }
      }];
-    self.attributedText = textAttStr;
     return textAttStr;
 }
 
@@ -466,6 +485,33 @@ NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefau
         }
     }
     _hasRemoveObserver = YES;
+}
+
++ (NSMutableAttributedString *)setRangeStrAsSpecialText:(NSRange)range
+                                             attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs
+                                         attributedText:(NSMutableAttributedString *)attributedText
+{
+    if (range.location == NSNotFound) {
+        return attributedText;
+    }
+    if (range.location >= attributedText.length) {
+        return attributedText;
+    }
+    if (range.location + range.length > attributedText.length) {
+        range = NSMakeRange(range.location, attributedText.length-range.location);
+    }
+    
+    attributedText = [CJUITextView handleEditTextModel:attributedText];
+    
+    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithAttributedString:attributedText];
+    NSString *insertKeyGroup = kCJInsterDefaultGroupAttributeName;
+    [attStr addAttribute:kCJInsterSpecialTextKeyGroupAttributeName value:insertKeyGroup range:range];
+    //插入key
+    NSString *insertKey = [NSUUID UUID].UUIDString;
+    [attStr addAttribute:kCJInsterSpecialTextKeyAttributeName value:insertKey range:range];
+    [attStr addAttribute:kCJInsterSpecialTextRangeAttributeName value:NSStringFromRange(range) range:range];
+    [attStr addAttributes:attrs range:range];
+    return attStr;
 }
 
 #pragma mark - Observer
@@ -562,7 +608,6 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
     }
 }
 - (void)textViewDidEndEditing:(UITextView *)textView {
-    [self handleEditTextModel];
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidEndEditing:)]) {
         [self.myDelegate CJUITextViewDidEndEditing:self];
     }

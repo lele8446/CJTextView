@@ -10,9 +10,10 @@
 #import <UIKit/UIKit.h>
 
 /**
- 文本对象model
+ CJUITextView、CJDisplayTextView 编辑与显示相关的model对象
  */
 @interface CJTextViewModel : NSObject
+
 /**
  插入文本标识符
  */
@@ -24,7 +25,7 @@
 /**
  文本的NSAttributedString
  */
-@property (nonatomic, strong) NSAttributedString *attrString;
+@property (nonatomic, strong) NSMutableAttributedString *attrString;
 /**
  文本自定义参数
  */

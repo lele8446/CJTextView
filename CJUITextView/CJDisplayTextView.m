@@ -7,16 +7,25 @@
 //
 
 #import "CJDisplayTextView.h"
+#import "CJUITextView.h"
+
+static inline CGFLOAT_TYPE CJTextViewCGFloat_ceil(CGFLOAT_TYPE cgfloat) {
+#if CGFLOAT_IS_DOUBLE
+    return ceil(cgfloat);
+#else
+    return ceilf(cgfloat);
+#endif
+}
 
 //标记link链点的自定义参数
 NSString * const kCJLinkParameterAttributeName   = @"kCJLinkParameterAttributeName";
 NSString * const kCJLinkAfterClickAttributesName = @"kCJLinkAfterClickAttributesName";
 
 typedef enum : NSUInteger {
-    PhoneNumberLink = 0,
-    UrlLink,
-    AddressLink,
-    OtherLink
+    CJPhoneNumberLink = 0,
+    CJUrlLink,
+    CJAddressLink,
+    CJOtherLink
 } CJTextViewLinkType;
 
 @interface CJLinkNSURL : NSURL
@@ -32,6 +41,8 @@ typedef enum : NSUInteger {
 @end
 
 @interface CJDisplayTextView ()<UITextViewDelegate>
+{
+}
 @end
 
 @implementation CJDisplayTextView
@@ -58,27 +69,19 @@ typedef enum : NSUInteger {
     self.showsVerticalScrollIndicator = NO;
     self.bounces = NO;
     self.dataDetectorTypes = UIDataDetectorTypeAll;
-    self.contentInset = UIEdgeInsetsMake(-100, 0, 0, 0);
-    self.textContainerInset = UIEdgeInsetsMake(0, -5, 0, -5);
+    self.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
     [self setValue:self forKey:@"delegate"];
 }
 
 - (void)layoutSubviews {
     [super layoutSubviews];
+    self.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
 }
 
-- (void)drawRect:(CGRect)rect {
-    [super drawRect:rect];
-    
-    CGSize textSize = [self caculateTextViewSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];
-    NSLog(@"size = %@",NSStringFromCGSize(textSize));
-    self.bounds = CGRectMake(0, 0, self.frame.size.width, textSize.height);
-    self.contentSize = self.bounds.size;
-    self.textContainer.size = textSize;
-    [self scrollRangeToVisible:NSMakeRange(0,0)];
-    [self setContentOffset:CGPointMake(0, 0)];
-    if(self.displayViewLayoutBlock) {
-        self.displayViewLayoutBlock(textSize);
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesEnded:touches withEvent:event];
+    if (self.clickDisplayViewBlock) {
+        self.clickDisplayViewBlock();
     }
 }
 
@@ -109,17 +112,24 @@ typedef enum : NSUInteger {
         [dicAtt addEntriesFromDictionary:attrs];
         [linkStr addAttributes:dicAtt range:range];
     }
-    
+
     CJTextViewModel *linkModel = [[CJTextViewModel alloc]init];
     linkModel.parameter = parameter;
     linkModel.afterClickAttributes = afterClickAttributes;
-    
-#warning 不知为毛，这里设置 NSAttachmentAttributeName 无效了，改为通过 NSLinkAttributeName 设置
+
+//#warning 不知为毛，这里设置 NSAttachmentAttributeName 无效了，改为通过 NSLinkAttributeName 设置
 //    CJLinkTextAttachment *textAttachment = [[CJLinkTextAttachment alloc]init];
 //    textAttachment.textModel = linkModel;
+//    textAttachment.image = [UIImage imageNamed:@"icon_list_link_little"];
+//    textAttachment.bounds = CGRectMake(0, 0, 0, 0);
+//    NSAttributedString *attachmentStr = [NSAttributedString attributedStringWithAttachment:textAttachment];
+//    [linkStr insertAttributedString:attachmentStr atIndex:0];
+//    [linkStr appendAttributedString:[attachmentStr copy]];
 //    [linkStr addAttribute:NSAttachmentAttributeName value:textAttachment range:NSMakeRange(0, linkStr.length)];
     
-    CJLinkNSURL *url = [CJLinkNSURL URLWithString:@"https://github.com/lele8446/TextViewDemo"];
+    NSString *urlStr = [NSString stringWithFormat:@"http://%@",[NSUUID UUID].UUIDString];
+    urlStr = [urlStr stringByReplacingOccurrencesOfString:@"-" withString:@""];
+    CJLinkNSURL *url = [CJLinkNSURL URLWithString:urlStr];
     url.textModel = linkModel;
     [linkStr addAttribute:NSLinkAttributeName value:url range:NSMakeRange(0, linkStr.length)];
     
@@ -133,15 +143,9 @@ typedef enum : NSUInteger {
 }
 
 - (CGSize)caculateTextViewSize:(CGSize)textSize {
-    return [self sizeThatFits:textSize];
-}
-
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    if (scrollView == self) {
-        CGRect bounds = self.bounds;
-        bounds.origin.y = 0;
-        self.bounds = bounds;
-    }
+    CGSize caculateSize = [self sizeThatFits:textSize];
+    caculateSize = CGSizeMake(CJTextViewCGFloat_ceil(caculateSize.width), CJTextViewCGFloat_ceil(caculateSize.height));
+    return caculateSize;
 }
 
 - (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction {
@@ -164,8 +168,7 @@ typedef enum : NSUInteger {
 {
     if ([link isKindOfClass:[NSURL class]]) {
         if ([link isKindOfClass:[CJLinkNSURL class]]) {
-            CJLinkNSURL *linkUrl = (CJLinkNSURL *)link;
-            CJTextViewModel *linkModel = linkUrl.textModel;
+            CJTextViewModel *linkModel = [(CJLinkNSURL *)link textModel];
             
             NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithAttributedString:textView.attributedText];
             
@@ -181,8 +184,7 @@ typedef enum : NSUInteger {
         }
         else{
             if (self.shouldInteractUrlBlock) {
-                NSURL *linkUrl = (NSURL *)link;
-                return self.shouldInteractUrlBlock(linkUrl, characterRange,interaction);
+                return self.shouldInteractUrlBlock(link, characterRange,interaction);
             }else{
                 return YES;
             }
@@ -191,8 +193,7 @@ typedef enum : NSUInteger {
     
     if ([link isKindOfClass:[NSTextAttachment class]]) {
         if ([link isKindOfClass:[CJLinkTextAttachment class]]) {
-            CJLinkTextAttachment *linkTextAttachment = (CJLinkTextAttachment *)link;
-            CJTextViewModel *linkModel = linkTextAttachment.textModel;
+            CJTextViewModel *linkModel = [(CJLinkTextAttachment *)link textModel];
             
             NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithAttributedString:textView.attributedText];
             
@@ -208,8 +209,7 @@ typedef enum : NSUInteger {
         }
         else{
             if (self.shouldInteractAttachmentBlock) {
-                NSTextAttachment *textAttachment = (NSTextAttachment *)link;
-                return self.shouldInteractAttachmentBlock(textAttachment, characterRange,interaction);
+                return self.shouldInteractAttachmentBlock(link, characterRange,interaction);
             }else{
                 return YES;
             }
@@ -229,6 +229,14 @@ typedef enum : NSUInteger {
             if (self.pressBlock) {
                 self.pressBlock(linkModel);
             }
+        }else if (interaction == UITextItemInteractionPreview) {
+            if (self.pressBlock) {
+                self.pressBlock(linkModel);
+            }
+        }else{
+            if (self.clickBlock) {
+                self.clickBlock(linkModel);
+            }
         }
     }else{
         if (self.clickBlock) {
@@ -237,3 +245,4 @@ typedef enum : NSUInteger {
     }
 }
 @end
+

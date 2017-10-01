@@ -21,7 +21,7 @@
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]init];
         for (CJTextViewModel *model in self.textModelArray) {
             if (model.isLink) {
-                NSAttributedString *linkStr = [CJDisplayTextView linkAttStr:model.attrString attributes:nil parameter:model.parameter];
+                NSAttributedString *linkStr = [CJDisplayTextView linkAttStr:model.attrString attributes:nil afterClickAttributes:nil parameter:model.parameter];
                 [attStr appendAttributedString:linkStr];
             }else{
                 [attStr appendAttributedString:model.attrString];
@@ -43,11 +43,11 @@
                                   NSUnderlineStyleAttributeName:@1,
                                   NSForegroundColorAttributeName:[UIColor blueColor],
                                   NSParagraphStyleAttributeName:paragraph};
-        //
-        //    NSDictionary *afterLinkDic = @{NSForegroundColorAttributeName:[UIColor redColor]};
+        
+        NSDictionary *afterLinkDic = @{NSForegroundColorAttributeName:[UIColor redColor]};
         
         NSAttributedString *userStr = [[NSAttributedString alloc]initWithString:@"@用户"];
-        NSAttributedString *linkStr = [CJDisplayTextView linkAttStr:userStr attributes:linkDic parameter:@"用户id"];
+        NSAttributedString *linkStr = [CJDisplayTextView linkAttStr:userStr attributes:linkDic afterClickAttributes:afterLinkDic parameter:@"用户id"];
         
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithString:str attributes:attDic];
         [attStr insertAttributedString:linkStr atIndex:111];
@@ -55,10 +55,6 @@
         self.textView.attributedText = attStr;
     }
     
-    __weak typeof(self)wSelf = self;
-    self.textView.displayViewLayoutBlock = ^(CGSize size){
-        wSelf.textViewHeight.constant = size.height;
-    };
     self.textView.clickBlock = ^(CJTextViewModel *textModel){
         NSLog(@"点击 linkAttstr = %@",textModel.attrString);
         NSLog(@"点击 parameter = %@",textModel.parameter);
@@ -68,7 +64,14 @@
         NSLog(@"长按 parameter = %@",textModel.parameter);
 
     };
+    self.textView.shouldInteractUrlBlock = ^(NSURL *url, NSRange range, UITextItemInteraction interaction){
+        NSLog(@"跳转网址 url = %@",url);
+        return YES;
+    };
     self.textView.backgroundColor = [UIColor lightGrayColor];
+    CGFloat height = [self.textView caculateTextViewSize:CGSizeMake(ScreenWidth - 80, MAXFLOAT)].height;
+    NSLog(@"height = %@",@(height));
+    self.textViewHeight.constant = height;
 }
 
 - (void)didReceiveMemoryWarning {

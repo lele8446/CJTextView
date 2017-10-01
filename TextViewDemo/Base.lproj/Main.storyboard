@@ -6,7 +6,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
-        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -188,10 +187,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Mvr-aj-dnI" customClass="CJDisplayTextView">
-                                <rect key="frame" x="40" y="100" width="240" height="128"/>
+                                <rect key="frame" x="40" y="100" width="240" height="350"/>
                                 <color key="backgroundColor" red="0.84705882349999995" green="0.86274509799999999" blue="0.87450980389999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="128" id="1tS-n6-fXK"/>
+                                    <constraint firstAttribute="height" constant="350" id="BiJ-gD-h5q"/>
                                 </constraints>
                                 <attributedString key="attributedText"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -199,21 +198,21 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="Mvr-aj-dnI" firstAttribute="top" secondItem="5ZP-Qn-leX" secondAttribute="bottom" constant="100" id="ff6-so-YB6"/>
-                            <constraint firstItem="Mvr-aj-dnI" firstAttribute="leading" secondItem="qYx-ad-kmT" secondAttribute="leading" constant="40" id="kQa-F3-VSR"/>
-                            <constraint firstAttribute="trailing" secondItem="Mvr-aj-dnI" secondAttribute="trailing" constant="40" id="wfz-rG-iZJ"/>
+                            <constraint firstItem="Mvr-aj-dnI" firstAttribute="leading" secondItem="qYx-ad-kmT" secondAttribute="leading" constant="40" id="2ki-0R-CQL"/>
+                            <constraint firstAttribute="trailing" secondItem="Mvr-aj-dnI" secondAttribute="trailing" constant="40" id="5Na-cX-zd1"/>
+                            <constraint firstItem="Mvr-aj-dnI" firstAttribute="top" secondItem="5ZP-Qn-leX" secondAttribute="bottom" constant="100" id="IGW-wu-kZd"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Display" id="vPY-Rg-Ulp"/>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
                     <connections>
                         <outlet property="textView" destination="Mvr-aj-dnI" id="o4M-fg-vWy"/>
-                        <outlet property="textViewHeight" destination="1tS-n6-fXK" id="jHw-sx-KM8"/>
+                        <outlet property="textViewHeight" destination="BiJ-gD-h5q" id="X6F-t5-HHb"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="yFt-xU-93G" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-203" y="187"/>
+            <point key="canvasLocation" x="-204.375" y="186.97183098591549"/>
         </scene>
     </scenes>
 </document>

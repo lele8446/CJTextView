@@ -12,7 +12,7 @@
 @implementation CJTextViewModel
 
 + (CJTextViewModel *)modelWithIdentifier:(NSString *)identifier
-                              attrString:(NSAttributedString *)attrString
+                              attrString:(NSMutableAttributedString *)attrString
                                parameter:(id)parameter
 {
     CJTextViewModel *model = [[CJTextViewModel alloc]init];
