@@ -33,25 +33,25 @@ pod 'CJTextView', '~> 2.0.0'
 ```
 
 ## 更新日志
-* V2.0.0
+* V2.0.0<br/>
 优化内部实现，修复已知的一些问题。
 新增CJDisplayTextView，提供富文本显示功能，可自动识别网址、日期、地址、电话以及添加自定义点击链点。
 引入CJTextViewModel，插入与显示富文本均通过CJTextViewModel实现
-* V0.0.9
+* V0.0.9<br/>
 修复语音输入空白语音的错误
-* V0.0.8
+* V0.0.8<br/>
 修复iOS9以下系统的KVO问题
-* V0.0.7
+* V0.0.7<br/>
 插入特殊字符判空处理
-* V0.0.6
+* V0.0.6<br/>
 增加`CJUITextView:placeHoldLabelHidden:`以及`CJUITextView:changeSelectedRange:`回调
-* V0.0.5
+* V0.0.5<br/>
 设置默认字体
-* V0.0.3、V0.0.4
+* V0.0.3、V0.0.4<br/>
 修复KVO监测问题
-* V0.0.2
+* V0.0.2<br/>
 修复移除KVO监测的bug，添加placeHoldContainerInset设置
-* V0.0.1
+* V0.0.1<br/>
 发布版本，支持：1、添加placeHold提示；2、输入时可插入不可编辑的自定义文本（如＃主题＃，@人名）；3、UITextView高度可根据输入内容动态调整
 
 
