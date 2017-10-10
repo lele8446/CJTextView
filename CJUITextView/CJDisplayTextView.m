@@ -116,16 +116,6 @@ typedef enum : NSUInteger {
     CJTextViewModel *linkModel = [[CJTextViewModel alloc]init];
     linkModel.parameter = parameter;
     linkModel.afterClickAttributes = afterClickAttributes;
-
-//#warning 不知为毛，这里设置 NSAttachmentAttributeName 无效了，改为通过 NSLinkAttributeName 设置
-//    CJLinkTextAttachment *textAttachment = [[CJLinkTextAttachment alloc]init];
-//    textAttachment.textModel = linkModel;
-//    textAttachment.image = [UIImage imageNamed:@"icon_list_link_little"];
-//    textAttachment.bounds = CGRectMake(0, 0, 0, 0);
-//    NSAttributedString *attachmentStr = [NSAttributedString attributedStringWithAttachment:textAttachment];
-//    [linkStr insertAttributedString:attachmentStr atIndex:0];
-//    [linkStr appendAttributedString:[attachmentStr copy]];
-//    [linkStr addAttribute:NSAttachmentAttributeName value:textAttachment range:NSMakeRange(0, linkStr.length)];
     
     NSString *urlStr = [NSString stringWithFormat:@"http://%@",[NSUUID UUID].UUIDString];
     urlStr = [urlStr stringByReplacingOccurrencesOfString:@"-" withString:@""];
@@ -221,19 +211,25 @@ typedef enum : NSUInteger {
 
 - (void)linkModel:(CJTextViewModel *)linkModel haveInteraction:(BOOL)haveInteraction interaction:(UITextItemInteraction)interaction {
     if (haveInteraction) {
-        if (interaction == UITextItemInteractionInvokeDefaultAction) {
-            if (self.clickBlock) {
-                self.clickBlock(linkModel);
+        if (@available(iOS 10.0, *)) {
+            if (interaction == UITextItemInteractionInvokeDefaultAction) {
+                if (self.clickBlock) {
+                    self.clickBlock(linkModel);
+                }
+            }else if (interaction == UITextItemInteractionPresentActions) {
+                if (self.pressBlock) {
+                    self.pressBlock(linkModel);
+                }
+            }else if (interaction == UITextItemInteractionPreview) {
+                if (self.pressBlock) {
+                    self.pressBlock(linkModel);
+                }
+            }else{
+                if (self.clickBlock) {
+                    self.clickBlock(linkModel);
+                }
             }
-        }else if (interaction == UITextItemInteractionPresentActions) {
-            if (self.pressBlock) {
-                self.pressBlock(linkModel);
-            }
-        }else if (interaction == UITextItemInteractionPreview) {
-            if (self.pressBlock) {
-                self.pressBlock(linkModel);
-            }
-        }else{
+        } else {
             if (self.clickBlock) {
                 self.clickBlock(linkModel);
             }

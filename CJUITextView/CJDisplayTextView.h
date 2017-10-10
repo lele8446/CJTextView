@@ -38,8 +38,9 @@
 @property (nonatomic, copy) BOOL(^shouldInteractAttachmentBlock)(NSTextAttachment *textAttachment, NSRange range, UITextItemInteraction interaction);
 /**
  点击CJDisplayTextView的回调（点击URL、NSTextAttachment、自定义链点、复制选择等，不会触发该回调）
+ 注意！！改方法可能会多次回调！！！
  */
-@property (nonatomic, copy) void(^clickDisplayViewBlock)();
+@property (nonatomic, copy) void(^clickDisplayViewBlock)(void);
 
 
 /**
@@ -47,13 +48,11 @@
 
  @param attStr               设置为点击链点的源NSAttributedString
  @param attrs                自定义属性
- @param afterClickAttributes 点击后的自定义属性
  @param parameter            自定义参数
  @return                     NSAttributedString
  */
 + (NSAttributedString *)linkAttStr:(NSAttributedString *)attStr
                         attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs
-              afterClickAttributes:(NSDictionary<NSAttributedStringKey, id> *)afterClickAttributes
                          parameter:(id)parameter;
 
 /**

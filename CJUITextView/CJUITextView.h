@@ -9,66 +9,40 @@
 #import <UIKit/UIKit.h>
 #import "CJTextViewModel.h"
 
-/**
- 记录插入文本的索引
- 注意！！2.0.0版本之前其对应的存储对象为NSUInteger类型，2.0.0后为NSString类型
- */
-extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！！对应2.0.0版本之前的SPECIAL_TEXT_NUM宏，请使用-insertTextModelWithIdentifier:相关方法获取插入文本")));
-
-/**
- 标记这是正常编辑的文本，不是插入的特殊文本。存储的值类型为NSString
- */
-extern NSString * const kCJTextAttributeName;
-/**
- 标记这是链点文本，存储的值类型为BOOl
- */
-extern NSString * const kCJLinkAttributeName;
-/**
- 标记插入文本的自定义参数，存储的值类型为id
- */
-extern NSString * const kCJInsterSpecialTextParameterAttributeName;
-/**
- 标记这是插入特殊文本，存储的值类型为NSString
- */
-extern NSString * const kCJInsterSpecialTextKeyGroupAttributeName;
-
-
 @class CJUITextView;
 
 @protocol CJUITextViewDelegate <NSObject>
-
 @optional
 /**
- *  当textView.returnKeyType = UIReturnKeyDone时，点击done执行该回调
- *
- *  @param textView
- *
- *  @return
+ 当textView.returnKeyType = UIReturnKeyDone时，点击done执行该回调
+
+ @param textView CJUITextView
  */
 - (void)CJUITextViewEnterDone:(CJUITextView *)textView;
+
 /**
- *  CJUITextView自动改变高度
- *
- *  @param textView
- *  @param size     改变高度后的size
+ CJUITextView自动改变高度
+
+ @param textView CJUITextView
+ @param frame    改变后的高度
  */
 - (void)CJUITextView:(CJUITextView *)textView heightChanged:(CGRect)frame;
+
 /**
- *  placeHoldLabel是否显示
- *
- *  @param textView
- *  @param hidden
+ placeHoldLabel是否显示
+
+ @param textView CJUITextView
+ @param hidden   是否显示提示语
  */
 - (void)CJUITextView:(CJUITextView *)textView placeHoldLabelHidden:(BOOL)hidden;
+
 /**
- *  改变选中文本
- *
- *  @param textView
- *  @param selectedRange
+ 改变选中文本
+
+ @param textView      CJUITextView
+ @param selectedRange 选中的文本范围
  */
 - (void)CJUITextView:(CJUITextView *)textView changeSelectedRange:(NSRange)selectedRange;
-
-- (void)CJUITextView:(CJUITextView *)textView layoutDisplaySize:(CGSize)displaySize;
 
 - (BOOL)CJUITextViewShouldBeginEditing:(CJUITextView *)textView;
 - (BOOL)CJUITextViewShouldEndEditing:(CJUITextView *)textView;
@@ -92,7 +66,7 @@ extern NSString * const kCJInsterSpecialTextKeyGroupAttributeName;
 /**
  CJUITextView功能概要：
  1、可设置placeHold默认提示语；
- 2、autoLayoutHeight设置，开启后TextView高度可根据输入内容动态调整
+ 2、高度自动改变（autoLayoutHeight）设置，开启后TextView高度可根据输入内容动态调整
  3、支持插入特殊文本，比如 @人名 、#主题#，同时设置插入文本是否可编辑，插入文本可携带自定义参数
  4、TextView输入内容，可通过 `-allTextModel` 等相关方法建模输出
  */
@@ -163,7 +137,7 @@ extern NSString * const kCJInsterSpecialTextKeyGroupAttributeName;
 /**
  根据插入文本key获取插入文本数组
  
- @param specialStrKey 插入文本key
+ @param identifier    插入文本key
  @return              CJTextViewModel数组
  */
 - (NSArray <CJTextViewModel *>*)insertTextModelWithIdentifier:(NSString *)identifier;
@@ -178,10 +152,7 @@ extern NSString * const kCJInsterSpecialTextKeyGroupAttributeName;
 /**
  获取所有文本model数组，包括输入的文本内容，顺序排列
  比如：textView.attributedText = @"测试内容1 @人名 #主题# 测试内容2"
- 结果为：@[ 测试内容1,
- @人名,
- #主题#,
- 测试内容2 ]
+ 结果为：@[ 测试内容1, @人名, #主题#, 测试内容2 ]
  
  @return  CJTextViewModel数组
  */
@@ -210,4 +181,26 @@ extern NSString * const kCJInsterSpecialTextKeyGroupAttributeName;
 
 @end
 
+/**
+ 记录插入文本的索引
+ 注意！！2.0.0版本之前其对应的存储对象为NSUInteger类型，2.0.0后为NSString类型
+ */
+extern NSString * const SPECIAL_TEXT_NUM __attribute__((deprecated("已废弃！！对应2.0.0版本之前的SPECIAL_TEXT_NUM宏，请使用-insertTextModelWithIdentifier:相关方法获取插入文本")));
+
+/**
+ 标记这是正常编辑的文本，不是插入的特殊文本。存储的值类型为NSString
+ */
+extern NSString * const kCJTextAttributeName;
+/**
+ 标记这是链点文本，存储的值类型为BOOl
+ */
+extern NSString * const kCJLinkAttributeName;
+/**
+ 标记插入文本的自定义参数，存储的值类型为id
+ */
+extern NSString * const kCJInsterSpecialTextParameterAttributeName;
+/**
+ 标记这是插入特殊文本，存储的值类型为NSString
+ */
+extern NSString * const kCJInsterSpecialTextKeyGroupAttributeName;
 

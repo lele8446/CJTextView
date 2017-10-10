@@ -209,7 +209,7 @@ NSString * const kCJLinkAttributeName                         = @"kCJLinkAttribu
  *  @param withRange 截取的位置
  *  @param attrs     截取文本的attrs属性
  *
- *  @return
+ *  @return NSMutableAttributedString
  */
 - (NSMutableAttributedString *)interceptString:(NSAttributedString *)attString
                                      withRange:(NSRange)withRange
@@ -570,14 +570,6 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
     }
 }
 
-/**
- *  UITextRange转换为NSRange
- *
- *  @param textView
- *  @param selectedTextRange
- *
- *  @return
- */
 - (NSRange)selectedRange:(UITextView *)textView selectTextRange:(UITextRange *)selectedTextRange {
     UITextPosition* beginning = textView.beginningOfDocument;
     UITextRange* selectedRange = selectedTextRange;
