@@ -1,7 +1,8 @@
 ***注意***
-V2.0.0版本新增CJDisplayTextView，提供富文本显示功能，可自动识别网址、日期、地址、电话以及添加自定义点击链点。
-引入CJTextViewModel，CJUITextView插入特殊文本改用
-`-insertSpecialText:(CJTextViewModel *)textModel atIndex:(NSUInteger)loc`方法，
+
+V2.0.0版本新增CJDisplayTextView，提供富文本显示功能，可自动识别网址、日期、地址、电话以及添加自定义点击链点。<br/>
+引入CJTextViewModel，CJUITextView插入特殊文本改用<br/>
+`-insertSpecialText:(CJTextViewModel *)textModel atIndex:(NSUInteger)loc`方法，<br/>
 同时优化了内部实现。
 
 
