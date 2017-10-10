@@ -37,6 +37,8 @@ pod 'CJTextView', '~> 2.0.0'
 优化内部实现，修复已知的一些问题。
 新增CJDisplayTextView，提供富文本显示功能，可自动识别网址、日期、地址、电话以及添加自定义点击链点。
 引入CJTextViewModel，插入与显示富文本均通过CJTextViewModel实现
+* V1.0.0<br/>
+解决光标跳到问题
 * V0.0.9<br/>
 修复语音输入空白语音的错误
 * V0.0.8<br/>
