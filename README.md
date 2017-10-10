@@ -1,5 +1,12 @@
-# CJTextView
-## 简介
+***注意***
+V2.0.0版本新增CJDisplayTextView，提供富文本显示功能，可自动识别网址、日期、地址、电话以及添加自定义点击链点。
+引入CJTextViewModel，CJUITextView插入特殊文本改用
+`-insertSpecialText:(CJTextViewModel *)textModel atIndex:(NSUInteger)loc`方法，
+同时优化了内部实现。
+
+
+## CJTextView
+### 简介
 自定义UITextView：
 * 1、添加placeHold提示
 * 2、输入时可插入不可编辑的自定义文本（如＃主题＃，@人名）；
