@@ -163,6 +163,15 @@ NSString * const kCJLinkAttributeName                         = @"kCJLinkAttribu
     }
 }
 
+- (void)adjustPlaceHoldLabelFrame:(CGRect)frame {
+    if (CGRectIsNull(frame)) {
+        self.defaultFrame = self.frame;
+        [self placeHoldLabelFrame];
+    }else{
+        self.placeHoldLabel.frame = frame;
+    }
+}
+
 - (void)hiddenPlaceHoldLabel {
     if (self.text.length > 0 || self.attributedText.length > 0) {
         self.placeHoldLabel.hidden = YES;

@@ -41,7 +41,7 @@
  */
 @property (nonatomic, assign) BOOL isLink;
 /**
- 点击链点之后的文本属性（CJDisplayTextView中用到）
+ 点击链点之后的文本属性（CJDisplayTextView中用到）暂未实现！！！！
  */
 @property (nonatomic, strong) NSDictionary <NSAttributedStringKey, id>* afterClickAttributes;
 

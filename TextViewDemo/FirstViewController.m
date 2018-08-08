@@ -10,6 +10,11 @@
 #import "SecondViewController.h"
 
 @interface FirstViewController ()
+{
+    NSInteger _themeNum;
+    NSInteger _nameNum;
+    BOOL _didDisappear;
+}
 @end
 
 @implementation FirstViewController
@@ -27,10 +32,13 @@
     self.textView.placeHoldString = @"请输入...";
     self.textView.font = [UIFont systemFontOfSize:14];
     self.textView.myDelegate = self;
-    self.textView.textColor = [UIColor blueColor];
+    self.textView.textColor = [UIColor blackColor];
 //    self.textView.returnKeyType = UIReturnKeyDone;
     //插入文本的颜色
     self.textView.specialTextColor = [UIColor redColor];
+    
+    _themeNum = 1;
+    _nameNum = 1;
     
 }
 
@@ -41,6 +49,44 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    if (!_didDisappear) {
+        [self textViewText];
+    }
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    _didDisappear = YES;
+}
+
+
+- (void)textViewText {
+    NSString *text = @"CJUITextView可显示输入提示语，http://dwz.cn/6CWXB0 高度可根据输入内容动态调整，可以插入特殊文本：\n";
+    self.textView.text = text;
+    
+    NSString *parameter = [NSString stringWithFormat:@" #主题%@#",@(_themeNum)];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:parameter];
+    [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:15] range:NSMakeRange(0, str.length)];
+    CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"主题" attrString:str parameter:parameter];
+    [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
+    
+    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc]initWithAttributedString:self.textView.attributedText];
+    [attStr appendAttributedString:[[NSAttributedString alloc] initWithString:@" "]];
+    self.textView.attributedText = attStr;
+    
+    parameter = [NSString stringWithFormat:@" @人名%@",@(_nameNum)];
+    str = [[NSMutableAttributedString alloc] initWithString:parameter];
+    [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:15] range:NSMakeRange(0, str.length)];
+    [str addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0, str.length)];
+    CJTextViewModel *nameModel = [CJTextViewModel modelWithIdentifier:@"人名" attrString:str parameter:parameter];
+    [self.textView insertSpecialText:nameModel atIndex:self.textView.selectedRange.location];
+    
+    attStr = [[NSMutableAttributedString alloc]initWithAttributedString:self.textView.attributedText];
+    NSAttributedString *endStr = [[NSAttributedString alloc] initWithString:@"，设置插入文本不可编辑" attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:14]}];
+    [attStr appendAttributedString:endStr];
+    self.textView.attributedText = attStr;
+    
+    [self.textView becomeFirstResponder];
 }
 
 - (IBAction)clickSwitch:(id)sender {
@@ -73,19 +119,21 @@
 
 - (IBAction)insertTextclick:(id)sender {
     [self.textView becomeFirstResponder];
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"#主题#"];
+    _themeNum ++;
+    NSString *parameter = [NSString stringWithFormat:@" #主题%@#",@(_themeNum)];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:parameter];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
-    NSString *parameter = [NSString stringWithFormat:@"#主题%@#",@(rand())];
     CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"主题" attrString:str parameter:parameter];
     [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
 }
 
 - (IBAction)insertTextclick2:(id)sender {
     [self.textView becomeFirstResponder];
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"@人名"];
+    _nameNum ++;
+    NSString *parameter = [NSString stringWithFormat:@" @人名%@",@(_nameNum)];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:parameter];
     [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, str.length)];
     [str addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0, str.length)];
-    NSString *parameter = [NSString stringWithFormat:@"@人名%@",@(rand())];
     CJTextViewModel *model = [CJTextViewModel modelWithIdentifier:@"人名" attrString:str parameter:parameter];
     [self.textView insertSpecialText:model atIndex:self.textView.selectedRange.location];
 }

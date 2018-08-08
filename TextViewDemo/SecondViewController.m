@@ -56,6 +56,10 @@
     self.textView.clickBlock = ^(CJTextViewModel *textModel){
         NSLog(@"点击 linkAttstr = %@",textModel.attrString);
         NSLog(@"点击 parameter = %@",textModel.parameter);
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"点击链点" message:textModel.parameter preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
+        [alert addAction:cancel];
+        [self presentViewController:alert animated:YES completion:nil];
     };
     self.textView.pressBlock = ^(CJTextViewModel *textModel){
         NSLog(@"长按 linkAttstr = %@",textModel.attrString);

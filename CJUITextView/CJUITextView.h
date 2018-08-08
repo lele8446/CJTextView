@@ -179,6 +179,12 @@
                                              attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs
                                          attributedText:(NSMutableAttributedString *)attributedText;
 
+/**
+ 调整 placeHoldLabel 位置
+ 
+ @param frame 自定义frame，传 CGRectNull 时根据文本内容自动调整
+ */
+- (void)adjustPlaceHoldLabelFrame:(CGRect)frame;
 @end
 
 /**
