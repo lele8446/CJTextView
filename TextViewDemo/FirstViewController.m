@@ -20,7 +20,7 @@
 @implementation FirstViewController
 
 - (void)dealloc {
-    [self.textView removeObserver];
+    
 }
 
 - (void)viewDidLoad {

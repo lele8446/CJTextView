@@ -26,9 +26,16 @@ NSString * const kCJTextAttributeName                         = @"kCJTextAttribu
 NSString * const kCJInsterDefaultGroupAttributeName           = @"kCJInsterDefaultGroupAttributeName";
 NSString * const kCJLinkAttributeName                         = @"kCJLinkAttributeName";
 
+typedef void(^ObserverResultBlock)(id oldValue, id newValue);
+typedef BOOL(^ObserverJudgeBlock)(NSString *path, void *context);
+@interface CJTextViewObserver : NSObject
+@property (nonatomic, copy) ObserverResultBlock resultBlock;
+@property (nonatomic, copy) ObserverJudgeBlock judgeBlock;
+- (void)observerForTarget:(NSObject *)target forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options context:(void *)context resultBlock:(ObserverResultBlock)resultBlock judgeBlock:(ObserverJudgeBlock)judgeBlock;
+@end
+
 @interface CJUITextView()<UITextViewDelegate>
 {
-    BOOL _hasRemoveObserver;
     BOOL _shouldChangeText;
     BOOL _enterDone;
     BOOL _afterLayout;
@@ -39,7 +46,11 @@ NSString * const kCJLinkAttributeName                         = @"kCJLinkAttribu
 @property (nonatomic, assign) NSUInteger specialTextNum;//记录特殊文本的索引值
 @property (nonatomic, assign) CGRect defaultFrame;//初始frame值
 @property (nonatomic, assign) int addObserverTime;//注册KVO的次数
+@property (nonatomic, strong) CJTextViewObserver *textViewObserver;//注册KVO观察者
+@property (nonatomic, strong) NSMutableArray *insterSpecialTextIndexArray;
+@property (nonatomic, assign) NSUInteger currentTextLength;
 
++ (NSRange)selectedRange:(UITextView *)textView selectTextRange:(UITextRange *)selectedTextRange;
 @end
 
 @implementation CJUITextView
@@ -115,16 +126,18 @@ NSString * const kCJLinkAttributeName                         = @"kCJLinkAttribu
 }
 
 - (void)dealloc {
-    self.myDelegate = nil;
-    
-    float iOSVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-    if (iOSVersion >= 9.0 && !_hasRemoveObserver) {
-        [self removeObserver];
-    }
-    
-    if (!_hasRemoveObserver) {
-        [self removeObserver];
-    }
+    _myDelegate = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIMenuControllerDidShowMenuNotification object:nil];
+    [self removeObserver:_textViewObserver forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
+//    id obser = self.observationInfo;
+//    if (obser) {
+//        @try {
+//            [self removeObserver:_textViewObserver forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
+//        } @catch (NSException *exception) {
+//            NSLog(@"ZWTTextView 多次删除了 selectedTextRange KVO");
+//        } @finally {
+//        }
+//    }
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -144,13 +157,16 @@ NSString * const kCJLinkAttributeName                         = @"kCJLinkAttribu
 }
 
 - (void)commonInit {
+    self.insterSpecialTextIndexArray = [NSMutableArray array];
     self.specialTextNum = 1;
     self.placeHoldContainerInset = UIEdgeInsetsMake(4, 4, 4, 4);
     self.font = [UIFont systemFontOfSize:14];
     self.defaultFrame = CGRectNull;
     self.defaultAttributes = self.typingAttributes;
+    [self addMenuControllerDidShowNotic];
     //由于delegate 被声明为 unavailable，这里只能通过kvc的方式设置了
     [self setValue:self forKey:@"delegate"];
+    self.textViewObserver = [[CJTextViewObserver alloc]init];
     [self addObserverForTextView];
     [self hiddenPlaceHoldLabel];
 }
@@ -484,16 +500,7 @@ NSString * const kCJLinkAttributeName                         = @"kCJLinkAttribu
 }
 
 - (void)removeObserver {
-    id obser = self.observationInfo;
-    if (obser) {
-        @try {
-            [self removeObserver:self forKeyPath:@"selectedTextRange" context:TextViewObserverSelectedTextRange];
-        } @catch (NSException *exception) {
-        } @finally {
-            
-        }
-    }
-    _hasRemoveObserver = YES;
+    NSLog(@"CJUITextView: - removeObserver， V2.0.2版本后该方法已经废弃，使用者无需再主动移除KVO监听");
 }
 
 + (NSMutableAttributedString *)setRangeStrAsSpecialText:(NSRange)range
@@ -523,6 +530,23 @@ NSString * const kCJLinkAttributeName                         = @"kCJLinkAttribu
     return attStr;
 }
 
+#pragma mark - NSNotificationCenter
+- (void)addMenuControllerDidShowNotic {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(menuControllerDidShow:) name:UIMenuControllerDidShowMenuNotification object:nil];
+}
+
+- (void)menuControllerDidShow:(NSNotification *)notification {
+    NSRange selectedRange = self.selectedRange;
+    [self getSelextIndex:selectedRange.location isLeft:YES completion:^(NSUInteger index) {
+        self.selectedRange = NSMakeRange(index, (selectedRange.location+selectedRange.length) - index);
+    }];
+    NSRange newRange = self.selectedRange;
+    NSUInteger rightIndex = newRange.location + newRange.length;
+    [self getSelextIndex:rightIndex isLeft:NO completion:^(NSUInteger index) {
+        self.selectedRange = NSMakeRange(newRange.location, index-newRange.location);
+    }];
+}
+
 #pragma mark - Observer
 static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRange;
 - (void)addObserverForTextView {
@@ -530,56 +554,64 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
     if (self.addObserverTime >= 1) {
         return;
     }
-    [self addObserver:self
-           forKeyPath:@"selectedTextRange"
-              options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
-              context:TextViewObserverSelectedTextRange];
+    __weak typeof(self) wSelf = self;
+    [self.textViewObserver observerForTarget:self forKeyPath:@"selectedTextRange" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:TextViewObserverSelectedTextRange resultBlock:^(id oldValue, id newValue) {
+        UITextRange *newContentStr = newValue;
+        UITextRange *oldContentStr = oldValue;
+        if (!CJTextViewIsNull(newContentStr) && !CJTextViewIsNull(oldContentStr)) {
+            NSRange newRange = [CJUITextView selectedRange:wSelf selectTextRange:newContentStr];
+            NSRange oldRange = [CJUITextView selectedRange:wSelf selectTextRange:oldContentStr];
+            
+            //长按弹出放大镜时，移动光标
+            if (newRange.length == 0) {
+                if (newRange.location != oldRange.location) {
+                    //判断光标移动，光标不能处在特殊文本内
+                    [wSelf.attributedText enumerateAttribute:kCJInsterSpecialTextKeyAttributeName inRange:NSMakeRange(0, wSelf.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+                        NSString *key = (NSString *)attrs;
+                        if (key && ![key isEqualToString:kCJTextAttributeName]) {
+                            if (newRange.location > range.location && newRange.location < (range.location+range.length)) {
+                                //光标距离左边界的值
+                                NSUInteger leftValue = newRange.location - range.location;
+                                //光标距离右边界的值
+                                NSUInteger rightValue = range.location+range.length - newRange.location;
+                                if (leftValue >= rightValue) {
+                                    wSelf.selectedRange = NSMakeRange(wSelf.selectedRange.location-leftValue, 0);
+                                }else{
+                                    wSelf.selectedRange = NSMakeRange(wSelf.selectedRange.location+rightValue, 0);
+                                }
+                            }
+                        }
+                    }];
+                }
+            }
+            //长按选择文字，移动选中文字时移动左右大头针
+            else{
+                //右边大头针移动
+                if (newRange.location == oldRange.location) {
+                    NSUInteger rightIndex = newRange.location + newRange.length;
+                    [self getSelextIndex:rightIndex isLeft:NO completion:^(NSUInteger index) {
+                        wSelf.selectedRange = NSMakeRange(newRange.location, index-newRange.location);
+                    }];
+                }
+                //左边大头针移动
+                else {
+                    //左边大头针选中不可编辑文本的判断，交由menuControllerDidShow方法判断
+                }
+                
+            }
+        }
+        wSelf.typingAttributes = wSelf.defaultAttributes;
+        if (wSelf.myDelegate && [wSelf.myDelegate respondsToSelector:@selector(CJUITextView:changeSelectedRange:)]) {
+            [wSelf.myDelegate CJUITextView:wSelf changeSelectedRange:wSelf.selectedRange];
+        }
+        
+    } judgeBlock:^BOOL(NSString *path, void *context) {
+        return (context == TextViewObserverSelectedTextRange && [path isEqual:@"selectedTextRange"] && !wSelf.enableEditInsterText);
+    }];
     self.addObserverTime ++;
 }
 
-- (void)observeValueForKeyPath:(NSString*) path
-                      ofObject:(id)object
-                        change:(NSDictionary*)change
-                       context:(void*)context
-{
-    if (context == TextViewObserverSelectedTextRange && [path isEqual:@"selectedTextRange"] && !self.enableEditInsterText){
-        
-        UITextRange *newContentStr = [change objectForKey:@"new"];
-        UITextRange *oldContentStr = [change objectForKey:@"old"];
-        if (!CJTextViewIsNull(newContentStr) && !CJTextViewIsNull(oldContentStr)) {
-            NSRange newRange = [self selectedRange:self selectTextRange:newContentStr];
-            NSRange oldRange = [self selectedRange:self selectTextRange:oldContentStr];
-            if (newRange.location != oldRange.location) {
-                //判断光标移动，光标不能处在特殊文本内
-                [self.attributedText enumerateAttribute:kCJInsterSpecialTextKeyAttributeName inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
-                    NSString *key = (NSString *)attrs;
-                    if (key && ![key isEqualToString:kCJTextAttributeName]) {
-                        if (newRange.location > range.location && newRange.location < (range.location+range.length)) {
-                            //光标距离左边界的值
-                            NSUInteger leftValue = newRange.location - range.location;
-                            //光标距离右边界的值
-                            NSUInteger rightValue = range.location+range.length - newRange.location;
-                            if (leftValue >= rightValue) {
-                                self.selectedRange = NSMakeRange(self.selectedRange.location-leftValue, 0);
-                            }else{
-                                self.selectedRange = NSMakeRange(self.selectedRange.location+rightValue, 0);
-                            }
-                        }
-                    }
-                    
-                }];
-            }
-        }
-    }else{
-        [super observeValueForKeyPath:path ofObject:object change:change context:context];
-    }
-    self.typingAttributes = self.defaultAttributes;
-    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:changeSelectedRange:)]) {
-        [self.myDelegate CJUITextView:self changeSelectedRange:self.selectedRange];
-    }
-}
-
-- (NSRange)selectedRange:(UITextView *)textView selectTextRange:(UITextRange *)selectedTextRange {
++ (NSRange)selectedRange:(UITextView *)textView selectTextRange:(UITextRange *)selectedTextRange {
     UITextPosition* beginning = textView.beginningOfDocument;
     UITextRange* selectedRange = selectedTextRange;
     UITextPosition* selectionStart = selectedRange.start;
@@ -587,6 +619,47 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
     const NSInteger location = [textView offsetFromPosition:beginning toPosition:selectionStart];
     const NSInteger length = [textView offsetFromPosition:selectionStart toPosition:selectionEnd];
     return NSMakeRange(location, length);
+}
+
+- (void)currentTextLengthAndInsterSpecialTextIndexArray {
+    NSUInteger textLength = self.text.length;
+    if (textLength == 0) {
+        textLength = self.attributedText.length;
+    }
+    if (textLength != self.currentTextLength) {
+        [self.insterSpecialTextIndexArray removeAllObjects];
+        [self.attributedText enumerateAttribute:kCJInsterSpecialTextKeyAttributeName inRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+            NSString *key = (NSString *)attrs;
+            if (key && ![key isEqualToString:kCJTextAttributeName]) {
+                for (NSInteger i = 1; i < range.length; i++) {
+                    [self.insterSpecialTextIndexArray addObject:@(range.location + i)];
+                }
+            }
+        }];
+        self.currentTextLength = textLength;
+    }
+}
+
+- (void)getSelextIndex:(NSInteger)index isLeft:(BOOL)isLeft completion:(void (^)(NSUInteger index))completion {
+    //当选中内容刚好在插入的不可编辑文本内时才要移动光标
+    if ([self.insterSpecialTextIndexArray containsObject:@(index)]) {
+        [self caculateSelextIndex:index isLeft:isLeft completion:completion];
+    }
+}
+
+- (void)caculateSelextIndex:(NSInteger)index isLeft:(BOOL)isLeft completion:(void (^)(NSUInteger index))completion {
+    if ([self.insterSpecialTextIndexArray containsObject:@(index)]) {
+        if (isLeft) {
+            index = index - 1;
+        }else{
+            index = index + 1;
+        }
+        [self caculateSelextIndex:index isLeft:isLeft completion:completion];
+    }else{
+        if (completion) {
+            completion(index);
+        }
+    }
 }
 
 #pragma mark - UITextViewDelegate
@@ -681,6 +754,9 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
     }
     [self hiddenPlaceHoldLabel];
     
+    //更新插入的不可编辑文本的位置信息
+    [self currentTextLengthAndInsterSpecialTextIndexArray];
+    
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidChangeSelection:)]) {
         [self.myDelegate CJUITextViewDidChangeSelection:self];
     }
@@ -712,3 +788,26 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 }
 @end
 
+
+@implementation CJTextViewObserver
+- (void)observerForTarget:(NSObject *)target forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options context:(void *)context resultBlock:(ObserverResultBlock)resultBlock judgeBlock:(ObserverJudgeBlock)judgeBlock {
+    [target addObserver:self forKeyPath:keyPath options:options context:context];
+    self.resultBlock = resultBlock;
+    self.judgeBlock = judgeBlock;
+}
+- (void)observeValueForKeyPath:(NSString*)path ofObject:(id)object change:(NSDictionary*)change context:(void*)context {
+    BOOL needObserver = NO;
+    if (self.judgeBlock) {
+        needObserver = self.judgeBlock(path,context);
+    }
+    if (needObserver){
+        UITextRange *newContentStr = [change objectForKey:@"new"];
+        UITextRange *oldContentStr = [change objectForKey:@"old"];
+        if (self.resultBlock) {
+            self.resultBlock(oldContentStr, newContentStr);
+        }
+    }else{
+        [super observeValueForKeyPath:path ofObject:object change:change context:context];
+    }
+}
+@end

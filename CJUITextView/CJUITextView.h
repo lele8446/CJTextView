@@ -159,13 +159,9 @@
 - (NSArray <CJTextViewModel *>*)allTextModel;
 
 /**
- * dealloc方法时，主动移除CJUITextView内部的相关KVO监测
- * 请在该 CJUITextView 所在的 父view 或者 ViewController 中的 dealloc 方法中调用
- * 注意!!!  iOS9以下系统必须调用，不然会crash !!!
- * 注意!!!  iOS9以下系统必须调用，不然会crash !!!
- * 注意!!!  iOS9以下系统必须调用，不然会crash !!!
+ * 主动移除CJUITextView内部的相关KVO监测
  */
-- (void)removeObserver;
+- (void)removeObserver __deprecated_msg("V2.0.2版本后该方法已经废弃，使用者无需再主动移除KVO监听");
 
 /**
  设置指定range的内容为特殊文本
