@@ -68,6 +68,7 @@
  1、可设置placeHold默认提示语；
  2、高度自动改变（autoLayoutHeight）设置，开启后TextView高度可根据输入内容动态调整
  3、支持插入特殊文本，比如 @人名 、#主题#，同时设置插入文本是否可编辑，插入文本可携带自定义参数
+    比如：@"测试内容1 @人名 #主题# 测试内容2 @人名1 测试内容3"
  4、TextView输入内容，可通过 `-allTextModel` 等相关方法建模输出
  */
 @interface CJUITextView : UITextView
@@ -79,6 +80,10 @@
  代理
  */
 @property (nonatomic, weak) id<CJUITextViewDelegate> myDelegate;
+/**
+ 提示语label
+ */
+@property (nonatomic, strong) UILabel *placeHoldLabel;
 /**
  输入提示语
  */
@@ -92,7 +97,7 @@
  */
 @property (nonatomic, strong, setter=setPlaceHoldTextColor:) UIColor *placeHoldTextColor;
 /**
- placeHold提示内容Insets值(默认 (4, 4, 4, 4))
+ placeHold提示内容Insets值(默认 (8, 4, 8, 4))
  */
 @property (nonatomic, assign, setter=setPlaceHoldContainerInset:) UIEdgeInsets placeHoldContainerInset;
 /**
@@ -111,6 +116,14 @@
  插入文本是否可编辑(默认 NO)
  */
 @property (nonatomic, assign) BOOL enableEditInsterText;
+/**
+ 最大可输入字数（默认 0，表示不限制）
+ */
+@property (nonatomic, assign) NSInteger maxEditNum;
+/**
+ 输入字数是否超出字数限制的回调（return BOOL值，超出字数限制之后是否允许继续输入）
+ */
+@property (nonatomic, copy) BOOL(^maxEditNumCallBlock)(NSUInteger textNum, BOOL overNum, CJUITextView *textView);
 
 /**
  *  在指定位置插入字符，并返回插入字符后的SelectedRange值
@@ -127,6 +140,7 @@
 
 /**
  在指定位置插入文本
+ 注意⚠️：必须在self.textColor、self.font、self.attributedText等属性设置完成后才能插入特殊文本
  
  @param textModel 插入文本对象
  @param loc       插入位置

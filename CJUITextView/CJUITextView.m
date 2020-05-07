@@ -40,12 +40,12 @@ typedef BOOL(^ObserverJudgeBlock)(NSString *path, void *context);
     BOOL _enterDone;
     BOOL _afterLayout;
 }
-@property (nonatomic, strong) UILabel *placeHoldLabel;
 @property (nonatomic, assign) BOOL placeHoldLabelHidden;
 @property (nonatomic, strong) NSDictionary *defaultAttributes;
 @property (nonatomic, assign) NSUInteger specialTextNum;//记录特殊文本的索引值
-@property (nonatomic, assign) CGRect defaultFrame;//初始frame值
+@property (nonatomic, assign) CGFloat oneLineHeight;//单行输入文字时的高度
 @property (nonatomic, assign) int addObserverTime;//注册KVO的次数
+
 @property (nonatomic, strong) CJTextViewObserver *textViewObserver;//注册KVO观察者
 @property (nonatomic, strong) NSMutableArray *insterSpecialTextIndexArray;
 @property (nonatomic, assign) NSUInteger currentTextLength;
@@ -60,7 +60,7 @@ typedef BOOL(^ObserverJudgeBlock)(NSString *path, void *context);
     if (!_placeHoldLabel) {
         _placeHoldLabel = [[UILabel alloc] initWithFrame:CGRectZero];
         [_placeHoldLabel setBackgroundColor:[UIColor clearColor]];
-        _placeHoldLabel.numberOfLines = 0;
+        _placeHoldLabel.numberOfLines = 1;
         _placeHoldLabel.minimumScaleFactor = 0.01;
         _placeHoldLabel.adjustsFontSizeToFitWidth = YES;
         _placeHoldLabel.textAlignment = NSTextAlignmentLeft;
@@ -108,11 +108,56 @@ typedef BOOL(^ObserverJudgeBlock)(NSString *path, void *context);
     [dic setValue:font forKey:NSFontAttributeName];
     self.defaultAttributes = dic;
     [self setPlaceHoldTextFont:font];
+    [self calculationOneLineHeight];
+}
+
+- (void)setTextColor:(UIColor *)textColor {
+    [super setTextColor:textColor];
+    NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithCapacity:3];
+    [dic addEntriesFromDictionary:self.defaultAttributes];
+    [dic setValue:textColor forKey:NSForegroundColorAttributeName];
+    self.defaultAttributes = dic;
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     [super setAttributedText:attributedText];
     self.typingAttributes = self.defaultAttributes;
+    
+    if (attributedText.length > 0) {
+        NSRange specialRange = NSMakeRange(0, attributedText.length);
+        NSDictionary *dicAtt = [attributedText attributesAtIndex:0 effectiveRange:&specialRange];
+        NSMutableParagraphStyle *style = dicAtt[NSParagraphStyleAttributeName];
+        if (style) {
+            NSTextAlignment alignment = style.alignment;
+            self.placeHoldLabel.textAlignment = alignment;
+        }
+        UIFont *font = self.defaultAttributes[NSFontAttributeName];
+        if (font) {
+            [self calculationOneLineHeight];
+        }
+    }
+}
+
+- (void)setTextAlignment:(NSTextAlignment)textAlignment {
+    [super setTextAlignment:textAlignment];
+    self.placeHoldLabel.textAlignment = textAlignment;
+    NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:self.defaultAttributes];
+    NSMutableParagraphStyle *style = self.defaultAttributes[NSParagraphStyleAttributeName];
+    if (!style) {
+        style = [[NSMutableParagraphStyle alloc]init];
+    }
+    style.alignment = textAlignment;
+    [dic setObject:style forKey:NSParagraphStyleAttributeName];
+    self.defaultAttributes = dic;
+}
+
+- (void)setTextContainerInset:(UIEdgeInsets)textContainerInset {
+    [super setTextContainerInset:textContainerInset];
+    self.placeHoldContainerInset = UIEdgeInsetsMake(textContainerInset.top,
+                                                    textContainerInset.left==0?4:textContainerInset.left,
+                                                    textContainerInset.bottom,
+                                                    textContainerInset.right==0?4:textContainerInset.right);
+    [self calculationOneLineHeight];
 }
 
 - (UIColor *)getSpecialTextColor {
@@ -123,6 +168,40 @@ typedef BOOL(^ObserverJudgeBlock)(NSString *path, void *context);
         _specialTextColor = self.textColor;
     }
     return _specialTextColor;
+}
+
+- (NSString *)text {
+    NSString *text = [super text];
+    text = [text stringByReplacingOccurrencesOfString:@"\u00a0" withString:@" "];
+    return text;
+}
+
+- (NSAttributedString *)attributedText {
+    NSAttributedString *attributedText = [super attributedText];
+    NSRange range = NSMakeRange(0, attributedText.length);
+    [attributedText.string stringByReplacingOccurrencesOfString:@"\u00a0" withString:@" " options:NSRegularExpressionSearch range:range];
+    return attributedText;
+}
+
+- (CGFloat)oneLineHeight {
+    if (_oneLineHeight == 0) {
+        _oneLineHeight = [self calculationOneLineHeight];
+    }
+    return _oneLineHeight;
+}
+
+- (CGFloat)calculationOneLineHeight {
+    UIFont *font = self.defaultAttributes[NSFontAttributeName];
+    if (!font) {
+        font = self.font;
+    }
+    if (!font) {
+        font = [UIFont systemFontOfSize:14];
+    }
+    NSDictionary *attr = @{NSFontAttributeName:font};
+    CGSize stringSize = [@"输入文本" boundingRectWithSize:CGSizeMake(375, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:attr context:nil].size;
+    _oneLineHeight = stringSize.height + self.textContainerInset.top + self.textContainerInset.bottom;
+    return _oneLineHeight;
 }
 
 - (void)dealloc {
@@ -157,11 +236,14 @@ typedef BOOL(^ObserverJudgeBlock)(NSString *path, void *context);
 }
 
 - (void)commonInit {
+    //确保KVO只注册一次
+    if (self.addObserverTime >= 1) {
+        return;
+    }
     self.insterSpecialTextIndexArray = [NSMutableArray array];
     self.specialTextNum = 1;
-    self.placeHoldContainerInset = UIEdgeInsetsMake(4, 4, 4, 4);
+    self.placeHoldContainerInset = UIEdgeInsetsMake(8, 4, 8, 4);
     self.font = [UIFont systemFontOfSize:14];
-    self.defaultFrame = CGRectNull;
     self.defaultAttributes = self.typingAttributes;
     [self addMenuControllerDidShowNotic];
     //由于delegate 被声明为 unavailable，这里只能通过kvc的方式设置了
@@ -173,15 +255,13 @@ typedef BOOL(^ObserverJudgeBlock)(NSString *path, void *context);
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    if (!_afterLayout) {
-        self.defaultFrame = self.frame;
+    if (!_afterLayout || ((self.placeHoldLabel.frame.size.width == 0) || (self.placeHoldLabel.frame.size.height == 0))) {
         [self placeHoldLabelFrame];
     }
 }
 
 - (void)adjustPlaceHoldLabelFrame:(CGRect)frame {
     if (CGRectIsNull(frame)) {
-        self.defaultFrame = self.frame;
         [self placeHoldLabelFrame];
     }else{
         self.placeHoldLabel.frame = frame;
@@ -203,21 +283,32 @@ typedef BOOL(^ObserverJudgeBlock)(NSString *path, void *context);
 }
 
 - (void)placeHoldLabelFrame {
-    CGFloat height = 24;
-    if (height > self.defaultFrame.size.height-self.placeHoldContainerInset.top-self.placeHoldContainerInset.bottom) {
-        height = self.defaultFrame.size.height-self.placeHoldContainerInset.top-self.placeHoldContainerInset.bottom;
+    CGFloat width = self.bounds.size.width - self.placeHoldContainerInset.left-self.placeHoldContainerInset.right;
+    CGSize sizeToFit = [self.placeHoldLabel sizeThatFits:CGSizeMake(width, MAXFLOAT)];
+    CGFloat height = sizeToFit.height;
+    
+    if (self.oneLineHeight > self.bounds.size.height) {
+        if (height > (self.bounds.size.height - (self.placeHoldContainerInset.top + self.placeHoldContainerInset.bottom))) {
+            height = self.bounds.size.height - (self.placeHoldContainerInset.top + self.placeHoldContainerInset.bottom);
+        }
     }
-    self.placeHoldLabel.frame = CGRectMake(self.placeHoldContainerInset.left,self.placeHoldContainerInset.top, self.defaultFrame.size.width - self.placeHoldContainerInset.left-self.placeHoldContainerInset.right, height);
+    else{
+        if (height > (self.oneLineHeight - (self.placeHoldContainerInset.top + self.placeHoldContainerInset.bottom))) {
+            height = self.oneLineHeight - (self.placeHoldContainerInset.top + self.placeHoldContainerInset.bottom);
+        }
+    }
+    
+    self.placeHoldLabel.frame = CGRectMake(self.placeHoldContainerInset.left,self.placeHoldContainerInset.top, self.bounds.size.width - self.placeHoldContainerInset.left-self.placeHoldContainerInset.right, height);
 }
 
 - (void)changeSize {
     CGRect oriFrame = self.frame;
     CGSize sizeToFit = [self sizeThatFits:CGSizeMake(oriFrame.size.width, MAXFLOAT)];
-    if (sizeToFit.height < self.defaultFrame.size.height) {
-        sizeToFit.height = self.defaultFrame.size.height;
+    if (sizeToFit.height < self.oneLineHeight) {
+        sizeToFit.height = self.oneLineHeight;
     }
-    if (oriFrame.size.height != sizeToFit.height && sizeToFit.height <= self.maxHeight) {
-        oriFrame.size.height = sizeToFit.height;
+    if (fabs((sizeToFit.height-oriFrame.size.height)) > 0.1 && sizeToFit.height <= self.maxHeight) {
+        oriFrame.size.height = ceilf(sizeToFit.height);
         self.frame = oriFrame;
         
         if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:heightChanged:)]) {
@@ -688,31 +779,9 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
-    _shouldChangeText = YES;
-    self.typingAttributes = self.defaultAttributes;
-    if ([text isEqualToString:@""] && !self.enableEditInsterText) {//删除
-        __block BOOL deleteSpecial = NO;
-        NSRange oldRange = textView.selectedRange;
-        
-        [textView.attributedText enumerateAttribute:kCJInsterSpecialTextKeyAttributeName inRange:NSMakeRange(0, textView.selectedRange.location) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
-            NSRange deleteRange = NSMakeRange(textView.selectedRange.location-1, 0) ;
-            NSString *key = (NSString *)attrs;
-            if (key && ![key isEqualToString:kCJTextAttributeName]) {
-                if (deleteRange.location > range.location && deleteRange.location < (range.location+range.length)) {
-                    NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:textView.attributedText];
-                    [textAttStr deleteCharactersInRange:range];
-                    textView.attributedText = textAttStr;
-                    deleteSpecial = YES;
-                    textView.selectedRange = NSMakeRange(oldRange.location-range.length, 0);
-                    *stop = YES;
-                }
-            }
-        }];
-        return !deleteSpecial;
-    }
     
-    _enterDone = NO;
     //输入了done
+    _enterDone = NO;
     if ([text isEqualToString:@"\n"]) {
         _enterDone = YES;
         if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewEnterDone:)]) {
@@ -724,21 +793,221 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
         }
     }
     
+    //处理右对齐无法输入空格的系统问题
+    if (self.textAlignment == NSTextAlignmentRight) {
+        if (range.location == textView.text.length && [text isEqualToString:@" "]) {
+            if (self.text.length == 0) {
+                return NO;
+            }
+            BOOL overNum = (self.maxEditNum > 0 && self.text.length >= self.maxEditNum);
+            if (!overNum) {
+                // ignore replacement string and add your own
+                if (textView.attributedText.length > 0) {
+                    NSAttributedString *blankStr = [[NSAttributedString alloc]initWithString:@"\u00a0" attributes:self.defaultAttributes];
+                    NSMutableAttributedString *str = [[NSMutableAttributedString alloc]initWithAttributedString:textView.attributedText];
+                    [str appendAttributedString:blankStr];
+                    textView.attributedText = str;
+                }else{
+                    textView.text = [textView.text stringByAppendingString:@"\u00a0"];
+                }
+            }
+            [self textViewTextChange:textView];
+            return NO;
+        }
+    }
+    
+    //输入删除判断
+    _shouldChangeText = YES;
+    self.typingAttributes = self.defaultAttributes;
+    if (text && [text isEqualToString:@""]) {
+        //不允许编辑插入的特殊字符
+        if (!self.enableEditInsterText) {
+            __block BOOL deleteSpecial = NO;
+            NSRange oldRange = textView.selectedRange;
+            [textView.attributedText enumerateAttribute:kCJInsterSpecialTextKeyAttributeName inRange:NSMakeRange(0, textView.selectedRange.location) options:NSAttributedStringEnumerationReverse usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+                NSRange deleteRange = NSMakeRange(textView.selectedRange.location-1, 0) ;
+                NSString *key = (NSString *)attrs;
+                if (key && ![key isEqualToString:kCJTextAttributeName]) {
+                    if (deleteRange.location > range.location && deleteRange.location < (range.location+range.length)) {
+                        NSMutableAttributedString *textAttStr = [[NSMutableAttributedString alloc] initWithAttributedString:textView.attributedText];
+                        [textAttStr deleteCharactersInRange:range];
+                        textView.attributedText = textAttStr;
+                        deleteSpecial = YES;
+                        textView.selectedRange = NSMakeRange(oldRange.location-range.length, 0);
+                        *stop = YES;
+                    }
+                }
+            }];
+            if (deleteSpecial) {
+                [self textViewTextChange:textView];
+                return NO;
+            }
+        }
+        
+        //右对齐删除，如果文本最后都是空格时，那么空格全部删除
+        if (self.textAlignment == NSTextAlignmentRight) {
+            __block NSRange blankRange = NSMakeRange(NSNotFound, 0);
+            [textView.text enumerateSubstringsInRange:NSMakeRange(0, [textView.text length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:
+            ^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
+                if ([substring isEqualToString:@" "]) {
+                    if (blankRange.location == NSNotFound) {
+                        blankRange = substringRange;
+                    }else{
+                        blankRange = NSMakeRange(blankRange.location, blankRange.length+substringRange.length);
+                    }
+                }else{
+                    blankRange = NSMakeRange(NSNotFound, 0);
+                }
+            }];
+            
+            if (blankRange.location+blankRange.length == range.location+range.length) {
+                
+                if (textView.attributedText.length > 0) {
+                    NSMutableAttributedString *str = [[NSMutableAttributedString alloc]initWithAttributedString:textView.attributedText];
+                    textView.attributedText = [str attributedSubstringFromRange:NSMakeRange(0, blankRange.location)];
+                }else{
+                    textView.text = [textView.text substringToIndex:blankRange.location];
+                }
+                [self textViewTextChange:textView];
+                return NO;
+            }
+        }
+        
+        //iOS13 三指撤销
+        BOOL result = YES;
+        if (range.location >= textView.text.length) {
+            result = NO;
+        }
+        else {
+            if ((range.location + range.length) >= textView.text.length) {
+                if (self.attributedText.length > 0) {
+                    NSInteger length = range.location;
+                    NSAttributedString *attStr = [self.attributedText attributedSubstringFromRange:NSMakeRange(0, length)];
+                    self.attributedText = attStr;
+                }else{
+                    NSInteger length = range.location;
+                    NSString *attStr = [self.text substringWithRange:NSMakeRange(0, length)];
+                    self.text = attStr;
+                }
+                result = NO;
+            }
+            else{
+                if (self.attributedText.length > 0) {
+                    NSInteger length = range.location;
+                    NSInteger tailLocation = range.location+range.length;
+                    NSAttributedString *attStr = [self.attributedText attributedSubstringFromRange:NSMakeRange(0, length)];
+                    NSAttributedString *tailAttStr = [self.attributedText attributedSubstringFromRange:NSMakeRange((tailLocation), (self.attributedText.length-tailLocation))];
+                    NSMutableAttributedString *str = [[NSMutableAttributedString alloc]initWithAttributedString:attStr];
+                    [str appendAttributedString:tailAttStr];
+                    self.attributedText = str;
+                    self.selectedRange = NSMakeRange(length, 0);
+                }else{
+                    NSInteger length = range.location;
+                    NSInteger tailLocation = range.location+range.length;
+                    NSString *attStr = [self.text substringWithRange:NSMakeRange(0, length)];
+                    NSString *tailAttStr = [self.text substringWithRange:NSMakeRange((tailLocation), (self.text.length-tailLocation))];
+                    NSMutableString *str = [[NSMutableString alloc]initWithString:attStr];
+                    [str appendString:tailAttStr];
+                    self.text = str;
+                    self.selectedRange = NSMakeRange(length, 0);
+                }
+                result = NO;
+            }
+        }
+        
+        if (!result) {
+            [textView unmarkText];
+            textView.layoutManager.allowsNonContiguousLayout = NO;
+            [self scrollRangeToVisible:NSMakeRange(self.selectedRange.location+self.selectedRange.length, 0)];
+            [self layoutIfNeeded];
+            [self textViewTextChange:textView];
+            return result;
+        }
+    }
+    
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextView:shouldChangeTextInRange:replacementText:)]) {
         return [self.myDelegate CJUITextView:self shouldChangeTextInRange:range replacementText:text];
     }
     return YES;
 }
+
+- (void)textViewTextChange:(UITextView *)textView {
+    if (self.maxEditNumCallBlock) {
+        BOOL overNum = (self.text.length >= self.maxEditNum && self.maxEditNum > 0);
+        self.maxEditNumCallBlock(textView.text.length, overNum, self);
+    }
+    if (self.autoLayoutHeight) {
+        [self changeSize];
+    }
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidChangeSelection:)]) {
+        [self.myDelegate CJUITextViewDidChangeSelection:self];
+    }
+    if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidChange:)]) {
+        [self.myDelegate CJUITextViewDidChange:self];
+    }
+}
+
 - (void)textViewDidChange:(UITextView *)textView {
     if (self.myDelegate && [self.myDelegate respondsToSelector:@selector(CJUITextViewDidChange:)]) {
         [self.myDelegate CJUITextViewDidChange:self];
+    }
+    
+    if (self.maxEditNum > 0) {
+        //获取高亮部分
+        UITextRange *selectedRange = [textView markedTextRange];
+        UITextPosition *position = [textView positionFromPosition:selectedRange.start offset:0];
+        // 没有高亮选择的字，则对已输入的文字进行字数统计和限制
+        if (!position) {
+            if (textView.text.length > self.maxEditNum) {
+                void (^substringTextBlock)(void) = ^{
+                    /*
+                     三指操作撤销时执行textChange，获取到的markedTextRange是nil，即便是存在markedText。这就导致text有可能会被修改。
+                     修改文案后再继续执行撤销操作，必定会产生 crash。所以这里将文本截取的操作异步添加到主队列，在下一个runloop执行。
+                     */
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (self.attributedText.length > 0) {
+                            NSInteger length = self.maxEditNum>[self.attributedText.string length]?[self.attributedText.string length]:self.maxEditNum;
+                            NSAttributedString *attStr = [self.attributedText attributedSubstringFromRange:NSMakeRange(0, length)];
+                            self.attributedText = attStr;
+                            self.selectedRange = NSMakeRange(length, 0);
+                        }else{
+                            NSInteger length = self.maxEditNum>[self.text length]?[self.text length]:self.maxEditNum;
+                            NSString *attStr = [self.text substringWithRange:NSMakeRange(0, length)];
+                            self.text = attStr;
+                            self.selectedRange = NSMakeRange(length, 0);
+                        }
+                        
+                        [textView unmarkText];
+                        textView.layoutManager.allowsNonContiguousLayout = NO;
+                        [self scrollRangeToVisible:NSMakeRange(self.selectedRange.location+self.selectedRange.length, 0)];
+                        [self layoutIfNeeded];
+                    });
+                };
+                if (self.maxEditNumCallBlock) {
+                    BOOL canEdit = self.maxEditNumCallBlock(textView.text.length, YES, self);
+                    if (!canEdit) {
+                        substringTextBlock();
+                    }
+                }else{
+                    substringTextBlock();
+                }
+            }else{
+                if (self.maxEditNumCallBlock) {
+                    self.maxEditNumCallBlock(textView.text.length, NO, self);
+                }
+            }
+        }
     }
 }
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
     _afterLayout = YES;
     self.typingAttributes = self.defaultAttributes;
-    if (_shouldChangeText) {
+    BOOL changeText = _shouldChangeText;
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 10.0) {
+        changeText = YES;
+    }
+    if (changeText) {
         if (self.autoLayoutHeight) {
             [self changeSize];
         }else{
@@ -790,6 +1059,9 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
 
 
 @implementation CJTextViewObserver
+- (void)dealloc {
+    NSLog(@"CJTextViewObserver dealloc");
+}
 - (void)observerForTarget:(NSObject *)target forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options context:(void *)context resultBlock:(ObserverResultBlock)resultBlock judgeBlock:(ObserverJudgeBlock)judgeBlock {
     [target addObserver:self forKeyPath:keyPath options:options context:context];
     self.resultBlock = resultBlock;
@@ -807,7 +1079,7 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
             self.resultBlock(oldContentStr, newContentStr);
         }
     }else{
-        [super observeValueForKeyPath:path ofObject:object change:change context:context];
+//        [super observeValueForKeyPath:path ofObject:object change:change context:context];
     }
 }
 @end
