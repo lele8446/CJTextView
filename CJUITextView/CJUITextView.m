@@ -873,55 +873,60 @@ static void *TextViewObserverSelectedTextRange = &TextViewObserverSelectedTextRa
             }
         }
         
-        //iOS13 三指撤销
-        BOOL result = YES;
-        if (range.location >= textView.text.length) {
-            result = NO;
-        }
-        else {
-            if ((range.location + range.length) >= textView.text.length) {
-                if (self.attributedText.length > 0) {
-                    NSInteger length = range.location;
-                    NSAttributedString *attStr = [self.attributedText attributedSubstringFromRange:NSMakeRange(0, length)];
-                    self.attributedText = attStr;
-                }else{
-                    NSInteger length = range.location;
-                    NSString *attStr = [self.text substringWithRange:NSMakeRange(0, length)];
-                    self.text = attStr;
+        //处理iOS13 三指撤销崩溃问题
+        if (@available(iOS 13.0, *)) {
+            double iOSVersion = [UIDevice currentDevice].systemVersion.doubleValue;
+            if (iOSVersion < 15.0) {
+                BOOL result = YES;
+                if (range.location >= textView.text.length) {
+                    result = NO;
                 }
-                result = NO;
-            }
-            else{
-                if (self.attributedText.length > 0) {
-                    NSInteger length = range.location;
-                    NSInteger tailLocation = range.location+range.length;
-                    NSAttributedString *attStr = [self.attributedText attributedSubstringFromRange:NSMakeRange(0, length)];
-                    NSAttributedString *tailAttStr = [self.attributedText attributedSubstringFromRange:NSMakeRange((tailLocation), (self.attributedText.length-tailLocation))];
-                    NSMutableAttributedString *str = [[NSMutableAttributedString alloc]initWithAttributedString:attStr];
-                    [str appendAttributedString:tailAttStr];
-                    self.attributedText = str;
-                    self.selectedRange = NSMakeRange(length, 0);
-                }else{
-                    NSInteger length = range.location;
-                    NSInteger tailLocation = range.location+range.length;
-                    NSString *attStr = [self.text substringWithRange:NSMakeRange(0, length)];
-                    NSString *tailAttStr = [self.text substringWithRange:NSMakeRange((tailLocation), (self.text.length-tailLocation))];
-                    NSMutableString *str = [[NSMutableString alloc]initWithString:attStr];
-                    [str appendString:tailAttStr];
-                    self.text = str;
-                    self.selectedRange = NSMakeRange(length, 0);
+                else {
+                    if ((range.location + range.length) >= textView.text.length) {
+                        if (self.attributedText.length > 0) {
+                            NSInteger length = range.location;
+                            NSAttributedString *attStr = [self.attributedText attributedSubstringFromRange:NSMakeRange(0, length)];
+                            self.attributedText = attStr;
+                        }else{
+                            NSInteger length = range.location;
+                            NSString *attStr = [self.text substringWithRange:NSMakeRange(0, length)];
+                            self.text = attStr;
+                        }
+                        result = NO;
+                    }
+                    else{
+                        if (self.attributedText.length > 0) {
+                            NSInteger length = range.location;
+                            NSInteger tailLocation = range.location+range.length;
+                            NSAttributedString *attStr = [self.attributedText attributedSubstringFromRange:NSMakeRange(0, length)];
+                            NSAttributedString *tailAttStr = [self.attributedText attributedSubstringFromRange:NSMakeRange((tailLocation), (self.attributedText.length-tailLocation))];
+                            NSMutableAttributedString *str = [[NSMutableAttributedString alloc]initWithAttributedString:attStr];
+                            [str appendAttributedString:tailAttStr];
+                            self.attributedText = str;
+                            self.selectedRange = NSMakeRange(length, 0);
+                        }else{
+                            NSInteger length = range.location;
+                            NSInteger tailLocation = range.location+range.length;
+                            NSString *attStr = [self.text substringWithRange:NSMakeRange(0, length)];
+                            NSString *tailAttStr = [self.text substringWithRange:NSMakeRange((tailLocation), (self.text.length-tailLocation))];
+                            NSMutableString *str = [[NSMutableString alloc]initWithString:attStr];
+                            [str appendString:tailAttStr];
+                            self.text = str;
+                            self.selectedRange = NSMakeRange(length, 0);
+                        }
+                        result = NO;
+                    }
                 }
-                result = NO;
+                
+                if (!result) {
+                    [textView unmarkText];
+                    textView.layoutManager.allowsNonContiguousLayout = NO;
+                    [self scrollRangeToVisible:NSMakeRange(self.selectedRange.location+self.selectedRange.length, 0)];
+                    [self layoutIfNeeded];
+                    [self textViewTextChange:textView];
+                    return result;
+                }
             }
-        }
-        
-        if (!result) {
-            [textView unmarkText];
-            textView.layoutManager.allowsNonContiguousLayout = NO;
-            [self scrollRangeToVisible:NSMakeRange(self.selectedRange.location+self.selectedRange.length, 0)];
-            [self layoutIfNeeded];
-            [self textViewTextChange:textView];
-            return result;
         }
     }
     
